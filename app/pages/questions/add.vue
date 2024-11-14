@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p> add new quesiton</p>
+   <QuestionsForm></QuestionsForm>
   </div>
 </template>
 

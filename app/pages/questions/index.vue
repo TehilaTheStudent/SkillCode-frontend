@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import type { InputOutput, Question } from "~/types";
-import { ref, computed, watch } from "vue";
-import QuestionDescription from "~/components/questions/QuestionDescription.vue";
-
 const config = useRuntimeConfig();
 const defaultColumns = [
   { key: "id", label: "ID" },
@@ -22,10 +19,11 @@ const selectedDifficulties = ref([]);
 const sort = ref({ column: "stats", direction: "desc" as const });
 const input = ref<{ input: HTMLInputElement }>();
 const isDescriptionModalOpen = ref(false);
+const isOpenFormModal = ref(false);
 const descriptionContent = ref("");
 const examples = ref<InputOutput[]>([]);
 const descriptionTitle = ref("");
-const router = useRouter();
+const currentQuestion = ref<Question | null>(null);
 
 function onViewDescription(row: Question) {
   descriptionTitle.value = row.title || "";
@@ -77,7 +75,8 @@ function onSelect(row: Question) {
 }
 
 function onEdit(row: Question) {
-  console.log("Edit:", row);
+  currentQuestion.value = row;
+  isOpenFormModal.value = true;
 }
 
 function onDelete(row: Question) {
@@ -87,10 +86,9 @@ function onDelete(row: Question) {
 function onRowClick(row: Question) {
   window.open(`/code-editor/${row.id}`, "_blank");
 }
-
-function onCreateNewQuestion() {
-  console.log("Create new question");
-  router.push("/questions/new");
+function onOpenQuestionForm(row: Question | null = null) {
+  currentQuestion.value = row;
+  isOpenFormModal.value = true;
 }
 
 defineShortcuts({
@@ -106,9 +104,7 @@ defineShortcuts({
       <UDashboardNavbar title="Questions" :badge="questions.length">
         <template #right>
           <!-- Moved filter input to display section -->
-          <UButton icon="i-heroicons-plus"  @click="onCreateNewQuestion">
-            New Question
-          </UButton>
+          <UButton icon="i-heroicons-plus" @click="onOpenQuestionForm"> New Question </UButton>
         </template>
       </UDashboardNavbar>
 
@@ -132,16 +128,6 @@ defineShortcuts({
         </template>
 
         <template #right>
-          <!-- <USelectMenu
-            v-model="selectedColumns"
-            icon="i-heroicons-adjustments-horizontal-solid"
-            :options="defaultColumns"
-            multiple
-            class="hidden lg:block"
-          >
-            <template #label> Display </template>
-          </USelectMenu> -->
-          <!-- Moved filter input here -->
           <UInput
             ref="input"
             v-model="q"
@@ -164,12 +150,16 @@ defineShortcuts({
         description="See description and examples of the question"
         :ui="{ width: 'sm:max-w-md' }"
       >
-        <QuestionDescription
+        <QuestionsQuestionDescription
           :title="descriptionTitle"
           :description="descriptionContent"
           :examples="examples"
         />
       </UDashboardModal>
+      <UModal v-model="isOpenFormModal" fullscreen>
+        <QuestionsQuestionForm @close="isOpenFormModal = false" :question="currentQuestion" />
+      </UModal>
+
       <UTable
         :rows="questions"
         v-model:sort="sort"

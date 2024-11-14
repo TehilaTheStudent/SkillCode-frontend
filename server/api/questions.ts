@@ -1,19 +1,5 @@
 import type { Question, AbstractType, Parameter, Difficulty } from "~/types";
-
-export enum AtomicType {
-  Integer = "Integer",
-  Number = "Number",
-  String = "String",
-  Boolean = "Boolean",
-}
-
-export enum CompositeType {
-  GraphNode = "GraphNode",
-  TreeNode = "TreeNode",
-  ListNode = "ListNode",
-  Array = "Array",
-  Matrix = "Matrix",
-}
+import { AtomicType, CompositeType } from "~/types/index.d";
 
 const questions: Question[] = [
   {
@@ -35,7 +21,7 @@ const questions: Question[] = [
       {
         parameters: ["[1, 2]", "[3, 4]"],
         expectedOutput: "[1, 2, 3, 4]",
-      },  
+      },
     ],
     testCases: [
       {
@@ -44,7 +30,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "mergeArrays",
+      name: "mergeArrays",
       parameters: [
         { name: "arr1", paramType: { type: CompositeType.Array } },
         { name: "arr2", paramType: { type: CompositeType.Array } },
@@ -73,7 +59,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "multiplyMatrices",
+      name: "multiplyMatrices",
       parameters: [
         { name: "matrix1", paramType: { type: CompositeType.Matrix } },
         { name: "matrix2", paramType: { type: CompositeType.Matrix } },
@@ -102,7 +88,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "maxDepth",
+      name: "maxDepth",
       parameters: [{ name: "root", paramType: { type: CompositeType.TreeNode } }],
       returnType: { type: AtomicType.Integer },
     },
@@ -128,7 +114,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "reverseList",
+      name: "reverseList",
       parameters: [{ name: "head", paramType: { type: CompositeType.ListNode } }],
       returnType: { type: CompositeType.ListNode },
     },
@@ -154,7 +140,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "cloneGraph",
+      name: "cloneGraph",
       parameters: [{ name: "node", paramType: { type: CompositeType.GraphNode } }],
       returnType: { type: CompositeType.GraphNode },
     },
@@ -180,7 +166,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "findMissingNumber",
+      name: "findMissingNumber",
       parameters: [{ name: "arr", paramType: { type: CompositeType.Array } }],
       returnType: { type: AtomicType.Integer },
     },
@@ -206,7 +192,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "lengthOfLongestSubstring",
+      name: "lengthOfLongestSubstring",
       parameters: [{ name: "s", paramType: { type: AtomicType.String } }],
       returnType: { type: AtomicType.Integer },
     },
@@ -232,7 +218,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "isValid",
+      name: "isValid",
       parameters: [{ name: "s", paramType: { type: AtomicType.String } }],
       returnType: { type: AtomicType.Boolean },
     },
@@ -258,7 +244,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "generateParenthesis",
+      name: "generateParenthesis",
       parameters: [{ name: "n", paramType: { type: AtomicType.Integer } }],
       returnType: { type: CompositeType.Array },
     },
@@ -284,7 +270,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "mergeTwoLists",
+      name: "mergeTwoLists",
       parameters: [
         { name: "l1", paramType: { type: CompositeType.ListNode } },
         { name: "l2", paramType: { type: CompositeType.ListNode } },
@@ -313,7 +299,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "inorderTraversal",
+      name: "inorderTraversal",
       parameters: [{ name: "root", paramType: { type: CompositeType.TreeNode } }],
       returnType: { type: CompositeType.Array },
     },
@@ -339,7 +325,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "isSymmetric",
+      name: "isSymmetric",
       parameters: [{ name: "root", paramType: { type: CompositeType.TreeNode } }],
       returnType: { type: AtomicType.Boolean },
     },
@@ -365,7 +351,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "maxSubArray",
+      name: "maxSubArray",
       parameters: [{ name: "nums", paramType: { type: CompositeType.Array } }],
       returnType: { type: AtomicType.Number },
     },
@@ -391,7 +377,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "spiralOrder",
+      name: "spiralOrder",
       parameters: [{ name: "matrix", paramType: { type: CompositeType.Matrix } }],
       returnType: { type: CompositeType.Array },
     },
@@ -417,7 +403,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "rotate",
+      name: "rotate",
       parameters: [{ name: "matrix", paramType: { type: CompositeType.Matrix } }],
       returnType: { type: CompositeType.Matrix },
     },
@@ -443,7 +429,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "groupAnagrams",
+      name: "groupAnagrams",
       parameters: [{ name: "strs", paramType: { type: CompositeType.Array } }],
       returnType: { type: CompositeType.Array },
     },
@@ -469,7 +455,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "myPow",
+      name: "myPow",
       parameters: [
         { name: "x", paramType: { type: AtomicType.Number } },
         { name: "n", paramType: { type: AtomicType.Integer } },
@@ -498,7 +484,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "subsets",
+      name: "subsets",
       parameters: [{ name: "nums", paramType: { type: CompositeType.Array } }],
       returnType: { type: CompositeType.Array },
     },
@@ -524,7 +510,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "exist",
+      name: "exist",
       parameters: [
         { name: "board", paramType: { type: CompositeType.Matrix } },
         { name: "word", paramType: { type: AtomicType.String } },
@@ -553,7 +539,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "combinationSum",
+      name: "combinationSum",
       parameters: [
         { name: "candidates", paramType: { type: CompositeType.Array } },
         { name: "target", paramType: { type: AtomicType.Integer } },
@@ -582,7 +568,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "solveNQueens",
+      name: "solveNQueens",
       parameters: [{ name: "n", paramType: { type: AtomicType.Integer } }],
       returnType: { type: CompositeType.Array },
     },
@@ -608,7 +594,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "trap",
+      name: "trap",
       parameters: [{ name: "height", paramType: { type: CompositeType.Array } }],
       returnType: { type: AtomicType.Integer },
     },
@@ -634,7 +620,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "minDistance",
+      name: "minDistance",
       parameters: [
         { name: "word1", paramType: { type: AtomicType.String } },
         { name: "word2", paramType: { type: AtomicType.String } },
@@ -663,7 +649,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "ladderLength",
+      name: "ladderLength",
       parameters: [
         { name: "beginWord", paramType: { type: AtomicType.String } },
         { name: "endWord", paramType: { type: AtomicType.String } },
@@ -693,7 +679,7 @@ const questions: Question[] = [
       },
     ],
     functionConfig: {
-      functionName: "isMatch",
+      name: "isMatch",
       parameters: [
         { name: "s", paramType: { type: AtomicType.String } },
         { name: "p", paramType: { type: AtomicType.String } },
@@ -723,15 +709,11 @@ export default eventHandler(async (event) => {
   }
 
   if (categories && categories.length > 0) {
-    filteredQuestions = filteredQuestions.filter((question) =>
-      categories.includes(question.category)
-    );
+    filteredQuestions = filteredQuestions.filter((question) => categories.includes(question.category));
   }
 
   if (difficulties && difficulties.length > 0) {
-    filteredQuestions = filteredQuestions.filter((question) =>
-      difficulties.includes(question.difficulty)
-    );
+    filteredQuestions = filteredQuestions.filter((question) => difficulties.includes(question.difficulty));
   }
 
   // Apply sorting
@@ -741,10 +723,7 @@ export default eventHandler(async (event) => {
     filteredQuestions.sort((a, b) => {
       if (sort === "difficulty") {
         const difficultyOrder = ["Easy", "Medium", "Hard"];
-        return (
-          (difficultyOrder.indexOf(a.difficulty) -
-            difficultyOrder.indexOf(b.difficulty)) * orderFactor
-        );
+        return (difficultyOrder.indexOf(a.difficulty) - difficultyOrder.indexOf(b.difficulty)) * orderFactor;
       }
 
       const aValue = a[sort];

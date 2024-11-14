@@ -43,6 +43,7 @@ export interface Range {
 }
 
 // skillcode types go here //////////////////////////////////////////////////
+export type Void = "Void";
 
 export enum AtomicType {
   Integer = "Integer",
@@ -60,7 +61,7 @@ export enum CompositeType {
 }
 
 export interface AbstractType {
-  type: CompositeType | AtomicType;
+  type: CompositeType | AtomicType | Void;
   tChildren?: AbstractType;
 }
 
@@ -70,7 +71,7 @@ export interface Parameter {
 }
 
 export interface FunctionConfig {
-  functionName: string; // Name of the function to implement
+  name: string; // Name of the function to implement
   parameters: Parameter[]; // List of parameters with abstract types
   returnType: AbstractType; // Return type of the function
 }

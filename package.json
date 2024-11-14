@@ -23,7 +23,8 @@
     "date-fns": "^4.1.0",
     "naive-ui": "^2.40.1",
     "nuxt": "^3.13.2",
-    "v-calendar": "^3.1.2"
+    "v-calendar": "^3.1.2",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@nuxt/eslint": "^0.6.0",
