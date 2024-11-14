@@ -1,47 +1,44 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  extends: ['@nuxt/ui-pro'],
+  extends: ["@nuxt/ui-pro"],
 
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/fonts',
-    '@nuxt/ui',
-    '@vueuse/nuxt'
-  ],
+  modules: ["@nuxt/eslint", "@nuxt/fonts", "@nuxt/ui", "@vueuse/nuxt"],
 
   ui: {
-    safelistColors: ['primary', 'red', 'orange', 'green']
+    safelistColors: ["primary", "red", "orange", "green"],
   },
-
+  runtimeConfig: {
+    public: {
+      apiBase: "http://localhost:8080/skillcode", // Backend base URL for API
+    },
+  },
   colorMode: {
-    disableTransition: true
+    disableTransition: true,
   },
 
   routeRules: {
-    // Temporary workaround for prerender regression. see https://github.com/nuxt/nuxt/issues/27490
-    '/': { prerender: true }
+    "/": { prerender: true },
   },
 
   devtools: {
-    enabled: true
+    enabled: true,
   },
 
   typescript: {
-    strict: false
+    strict: false,
   },
 
   future: {
-    compatibilityVersion: 4
+    compatibilityVersion: 4,
   },
 
   eslint: {
     config: {
       stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
+        commaDangle: "never",
+        braceStyle: "1tbs",
+      },
+    },
   },
 
-  compatibilityDate: '2024-07-11'
-})
+  compatibilityDate: "2024-07-11",
+});

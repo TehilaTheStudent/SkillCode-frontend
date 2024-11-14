@@ -12,6 +12,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.1.5",
     "@iconify-json/heroicons": "^1.2.1",
     "@iconify-json/simple-icons": "^1.2.9",
     "@nuxt/fonts": "^0.10.0",
@@ -20,6 +21,7 @@
     "@unovis/vue": "^1.4.4",
     "@vueuse/nuxt": "^11.1.0",
     "date-fns": "^4.1.0",
+    "naive-ui": "^2.40.1",
     "nuxt": "^3.13.2",
     "v-calendar": "^3.1.2"
   },

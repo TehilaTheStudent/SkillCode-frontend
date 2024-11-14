@@ -2,8 +2,8 @@
 import type { NuxtError } from '#app'
 
 useSeoMeta({
-  title: 'Page not found',
-  description: 'We are sorry but this page could not be found.'
+  title: 'SkillCode - Page not found',
+  description: 'We couldn’t find the page you were looking for. Return to practice and continue improving your skills.'
 })
 
 defineProps({

@@ -17,16 +17,17 @@ useHead({
   }
 })
 
-const title = 'Nuxt UI Pro - Dashboard template'
-const description = 'Nuxt UI Pro is a collection of premium Vue components built on top of Nuxt UI to create beautiful & responsive Nuxt applications in minutes.'
+const title = 'SkillCode'
+const description = 'SkillCode is a platform for developers to practice coding questions and improve their skills.'
+const ogImage = '/public/social_card.png'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://dashboard-template.nuxt.dev/social-card.png',
-  twitterImage: 'https://dashboard-template.nuxt.dev/social-card.png',
+  ogImage,
+  twitterImage: ogImage,
   twitterCard: 'summary_large_image'
 })
 </script>
