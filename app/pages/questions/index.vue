@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { InputOutput, Question } from "~/types";
+import { row } from "@unovis/ts/components/timeline/style";
+import { InputOutput, Question } from "~/types/index.d";
 const config = useRuntimeConfig();
 const defaultColumns = [
   { key: "id", label: "ID" },
@@ -21,14 +22,13 @@ const input = ref<{ input: HTMLInputElement }>();
 const isDescriptionModalOpen = ref(false);
 const isOpenFormModal = ref(false);
 const descriptionContent = ref("");
-const examples = ref<InputOutput[]>([]);
 const descriptionTitle = ref("");
-const currentQuestion = ref<Question | null>(null);
+const currentSelectedQuestion = ref<Question | null>(null);
 
 function onViewDescription(row: Question) {
   descriptionTitle.value = row.title || "";
   descriptionContent.value = row.description || "";
-  examples.value = row.examples || [];
+  currentSelectedQuestion.value = row;
   isDescriptionModalOpen.value = true;
 }
 
@@ -75,8 +75,9 @@ function onSelect(row: Question) {
 }
 
 function onEdit(row: Question) {
-  currentQuestion.value = row;
+  currentSelectedQuestion.value = row;
   isOpenFormModal.value = true;
+  onOpenQuestionForm(row);
 }
 
 function onDelete(row: Question) {
@@ -87,7 +88,7 @@ function onRowClick(row: Question) {
   window.open(`/code-editor/${row.id}`, "_blank");
 }
 function onOpenQuestionForm(row: Question | null = null) {
-  currentQuestion.value = row;
+  currentSelectedQuestion.value = row;
   isOpenFormModal.value = true;
 }
 
@@ -150,14 +151,10 @@ defineShortcuts({
         description="See description and examples of the question"
         :ui="{ width: 'sm:max-w-md' }"
       >
-        <QuestionsQuestionDescription
-          :title="descriptionTitle"
-          :description="descriptionContent"
-          :examples="examples"
-        />
+        <QuestionsDescription :selectedQuestion="currentSelectedQuestion" />
       </UDashboardModal>
       <UModal v-model="isOpenFormModal" fullscreen>
-        <QuestionsQuestionForm @close="isOpenFormModal = false" :question="currentQuestion" />
+        <QuestionsFormTabs @close="isOpenFormModal = false" :selectedQuestion="currentSelectedQuestion" />
       </UModal>
 
       <UTable
