@@ -12,3 +12,4 @@
 ### TODOS:
 - responsivness
 - connect to backend
+- error handling in submit form

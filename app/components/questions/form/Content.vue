@@ -1,17 +1,21 @@
 <script lang="ts" setup>
-import { QuestionsFormItemList } from '#components';
-import type { Question } from '~/types';
+import type { InputOutput } from "~/types";
+import { Question } from "~/types/index.d";
 
 const props = defineProps<{ state: Question }>();
 const emit = defineEmits(["updateState"]);
 
+const editItem = (index: number, item: InputOutput, isExample: boolean) => {
+  console.log("Edit item");
+};
+
 // Function to add a new item
-const addItem = (list: any[]) => {
-  list.push({ parameters: [""], expectedOutput: "" });
+const addItem = (list: InputOutput[]) => {
+  list.push({ parameters: [], expectedOutput: "" });
 };
 
 // Function to remove an item
-const removeItem = (list: any[], index: number) => {
+const removeItem = (list: InputOutput[], index: number) => {
   list.splice(index, 1);
 };
 </script>
@@ -25,6 +29,7 @@ const removeItem = (list: any[], index: number) => {
         :items="props.state.examples"
         :functionConfig="props.state.functionConfig"
         @addItem="() => addItem(props.state.examples)"
+        @editItem="(index, newItem) => editItem(index, newItem, true)"
         @removeItem="(index) => removeItem(props.state.examples, index)"
       />
     </div>
@@ -36,6 +41,7 @@ const removeItem = (list: any[], index: number) => {
         :functionConfig="props.state.functionConfig"
         @addItem="() => addItem(props.state.testCases)"
         @removeItem="(index) => removeItem(props.state.testCases, index)"
+        @editItem="(index, newItem) => editItem(index, newItem, false)"
       />
     </div>
   </div>

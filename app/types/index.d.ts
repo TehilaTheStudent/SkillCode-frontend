@@ -2,6 +2,10 @@ import type { Avatar } from "#ui/types";
 
 export type UserStatus = "subscribed" | "unsubscribed" | "bounced";
 
+/**
+ * @entity interface
+ * @fields id, name, email, avatar, status, location
+ */
 export interface User {
   id: number;
   name: string;
@@ -11,6 +15,10 @@ export interface User {
   location: string;
 }
 
+/**
+ * @entity interface
+ * @fields id, unread, from, subject, body, date
+ */
 export interface Mail {
   id: number;
   unread?: boolean;
@@ -20,6 +28,10 @@ export interface Mail {
   date: string;
 }
 
+/**
+ * @entity interface
+ * @fields name, username, role, avatar
+ */
 export interface Member {
   name: string;
   username: string;
@@ -27,6 +39,10 @@ export interface Member {
   avatar: Avatar;
 }
 
+/**
+ * @entity interface
+ * @fields id, unread, sender, body, date
+ */
 export interface Notification {
   id: number;
   unread?: boolean;
@@ -37,14 +53,24 @@ export interface Notification {
 
 export type Period = "daily" | "weekly" | "monthly";
 
+/**
+ * @entity interface
+ * @fields start, end
+ */
 export interface Range {
   start: Date;
   end: Date;
 }
 //#region SkillCode
 
+/**
+ * @entity type
+ */
 export type VoidType = "VoidType";
 
+/**
+ * @entity enum
+ */
 export enum AtomicType {
   Integer = "Integer",
   Double = "Double",
@@ -52,6 +78,9 @@ export enum AtomicType {
   Boolean = "Boolean",
 }
 
+/**
+ * @entity enum
+ */
 export enum CompositeType {
   GraphNode = "GraphNode",
   TreeNode = "TreeNode",
@@ -60,6 +89,9 @@ export enum CompositeType {
   Matrix = "Matrix",
 }
 
+/**
+ * @entity enum
+ */
 export enum PredefinedSupportedLanguage {
   JavaScript = "JavaScript",
   Python = "Python",
@@ -68,6 +100,9 @@ export enum PredefinedSupportedLanguage {
   CSharp = "CSharp",
 }
 
+/**
+ * @entity enum
+ */
 export enum PredefinedCategory {
   Array = "Array",
   Graph = "Graph",
@@ -89,13 +124,21 @@ function textify(value: string): string {
     
 }
 
+/**
+ * @entity class
+ * @fields type, tChildren
+ */
 export class AbstractType {
   public type: CompositeType | AtomicType;
   public tChildren?: AbstractType;
 
   constructor(type: CompositeType | AtomicType, tChildren?: AbstractType) {
     this.type = type;
-    this.tChildren = tChildren; // No additional validation required here
+    if (Object.values(CompositeType).includes(type as CompositeType) && !tChildren) {
+      this.tChildren = new AbstractType(AtomicType.Integer);
+    } else {
+      this.tChildren = tChildren;
+    }
   }
 
   /**
@@ -253,11 +296,19 @@ export class AbstractType {
   // }
 }
 
+/**
+ * @entity interface
+ * @fields name, paramType
+ */
 export interface Parameter {
   name: string;
   paramType: AbstractType;
 }
 
+/**
+ * @entity class
+ * @fields name, parameters, returnType
+ */
 export class FunctionConfig {
   public name: string;
   public parameters: Parameter[] | VoidType;
@@ -303,6 +354,10 @@ export class FunctionConfig {
   // }
 }
 
+/**
+ * @entity class
+ * @fields parameters, expectedOutput
+ */
 export class InputOutput {
   public parameters?: string[];
   public expectedOutput?: string;
@@ -350,6 +405,10 @@ export class InputOutput {
 
 export type Difficulty = "Easy" | "Medium" | "Hard";
 
+/**
+ * @entity class
+ * @fields id, title, description, difficulty, category, stats, examples, testCases, functionConfig, languages
+ */
 export class Question {
   static idCounter = 0;
   public id?: string;
@@ -482,22 +541,32 @@ export class Question {
   // }
 }
 
-//#endregion
-
 /// this logic is for the backend //////////////////////////////////////////////////
 //#region backend
 
+/**
+ * @entity interface
+ * @fields val, neighbors
+ */
 export interface GraphNode {
   val: number; // Value of the node
   neighbors: GraphNode[]; // List of neighboring nodes (for graphs)
 }
 
+/**
+ * @entity interface
+ * @fields val, left, right
+ */
 export interface TreeNode {
   val: number; // Value of the node
   left?: TreeNode; // Left child
   right?: TreeNode; // Right child
 }
 
+/**
+ * @entity interface
+ * @fields val, next
+ */
 export interface ListNode {
   val: number; // Value of the node
   next?: ListNode; // Pointer to the next node in the list

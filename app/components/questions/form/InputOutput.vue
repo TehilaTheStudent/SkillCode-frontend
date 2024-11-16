@@ -1,32 +1,67 @@
 <script lang="ts" setup>
-//this is a component that is used to display a single QuestionsFormInputOutput
-import { InputOutput } from '~/types';
-import {FunctionConfig } from '~/types/index.d'
+// This is a component that is used to display a single QuestionsFormInputOutput
+import type { Parameter, VoidType } from "~/types";
+import { FunctionConfig, InputOutput } from "~/types/index.d";
+
 const props = defineProps<{
   item: InputOutput;
   index: number;
-  removeItem: (index: number) => void;
-  functionConfig: any; // Add this line
+  functionConfig: FunctionConfig; // The function configuration
 }>();
+console.log(props.functionConfig);
+// Helper function to check if parameters are VoidType
+const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
+  return parameters === "VoidType";
+};
 </script>
+
 <template>
-  <div class="grid grid-cols-3 gap-2 w-full">
-    <!-- Parameter -->
-    <UInput v-model="props.item.parameters[0]" :placeholder="'Parameter'" :name="'param' + props.index" />
+  <div class="grid grid-cols-1 gap-4 w-full border border-blue-500 p-4 rounded">
+    <div class="text-gray-600 font-bold">#{{ props.index + 1 }}</div>
+    <!-- Dynamic Inputs Based on FunctionConfig -->
+    <div v-if="!isVoidType(props.functionConfig.parameters)">
+      <div
+        v-for="(param, paramIndex) in props.functionConfig.parameters"
+        :key="'param-' + paramIndex"
+        class="grid grid-cols-1 gap-2"
+      >
+        <!-- Parameter Name and Input -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 w-full">
+            <label class="font-medium">
+              <span
+                class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded border border-gray-200 font-mono"
+              >
+                {{ (param as Parameter).name }} =
+              </span>
+            </label>
+            <label class="font-medium">
+              <span
+                class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded border border-gray-200 overflow-hidden overflow-ellipsis whitespace-nowrap max-w-xs"
+              >
+                {{ (param as Parameter).paramType.toPrint() }}</span
+              >
+            </label>
+          </div>
+          <UInput
+            v-model="props.item.parameters[paramIndex]"
+            :placeholder="'Enter ' + (param as Parameter).name"
+            :name="'param-' + props.index + '-' + paramIndex"
+            class="w-full"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Expected Output -->
-    <UInput
-      v-model="props.item.expectedOutput"
-      :placeholder="'Expected Output'"
-      :name="'output' + props.index"
-    />
-    <!-- Delete Button -->
-    <UButton
-      size="sm"
-      color="red"
-      icon="i-material-symbols:delete-forever"
-      @click="props.removeItem(props.index)"
-    >
-      Delete
-    </UButton>
+    <div>
+      <label class="font-medium">Expected Output:</label>
+      <UInput
+        v-model="props.item.expectedOutput"
+        :placeholder="'Enter Expected Output'"
+        :name="'output-' + props.index"
+        class="w-full"
+      />
+    </div>
   </div>
 </template>

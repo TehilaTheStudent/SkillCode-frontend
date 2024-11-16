@@ -7,15 +7,12 @@ const emit = defineEmits(["update"]);
 
 const abstractTypeRoot = ref<AbstractType>(props.abstractType);
 
-watch(abstractTypeRoot, (newVal) => {
+watch(abstractTypeRoot, (newVal: AbstractType) => {
   emit("update", newVal);
 });
 
 function selectedVarTypeInIndex(payload:{ index: number, value: CompositeType | AtomicType}) {
   console.log(payload);
-  console.log("Selected var type in index:", payload.index);
-  console.log("Selected:", abstractTypeRoot.value.toPrint());
-
   abstractTypeRoot.value.setVarType(payload.index,payload.value);
 }
 
@@ -31,6 +28,7 @@ function selectedVarTypeInIndex(payload:{ index: number, value: CompositeType | 
     <div v-for="(varType, index) in abstractTypeRoot.toList()" :key="index" class="mb-4">
       <QuestionsFormSingleAbstractType
         :index="index"
+        :selectedVarTypeInIndex="varType"
         @update-in-index="selectedVarTypeInIndex"
       />
       <div v-if="index < abstractTypeRoot.toList().length - 1" class="text-center my-2">

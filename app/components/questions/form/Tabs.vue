@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 //Component to hold the 3 steps tabs in filling new question form
-//Used inside the modal
+//Used inside the modal, this has the submit button is the parent of Question state
 import type { Parameter, Difficulty } from "~/types"; //interfaces and types
 import {
   PredefinedCategory,
@@ -49,33 +49,28 @@ const schema = yup.object({
 
 type Schema = yup.InferType<typeof schema>;
 
-const state = reactive({
-  title: "", // Title of the question
-  description: "", // Description of the question
-  difficulty: "Medium" as Difficulty, // Difficulty, default value
-  category: PredefinedCategory.Array, // Category, default value
-  examples: [
-    {
-      parameters: [""], // Example input parameters (initially empty)
-      expectedOutput: "", // Expected output (initially empty)
-    },
-  ],
-  testCases: [
-    {
-      parameters: [""], // Test case input parameters
-      expectedOutput: "", // Test case expected output
-    },
-  ],
-  functionConfig: {
-    name: "", // Function name
-    parameters: [
-      { name: "n", paramType: new AbstractType(AtomicType.Integer) }, // Parameter definitions
-    ],
-    returnType: new AbstractType(AtomicType.Integer), // Return type of the function
-  },
-  languages: [PredefinedSupportedLanguage.Python], // Supported languages
-  stats: 0, // Add the missing 'stats' property
-});
+const state = reactive(
+  new Question(
+    "Merge Sorted Arrays",
+    "Merge two sorted arrays into one sorted array.",
+    "Medium",
+    "Array",
+    [new InputOutput(["[1, 2]", "[3, 4]"], "[1, 2, 3, 4]")],
+    [new InputOutput(["[1, 2]", "[3, 4]"], "[1, 2, 3, 4]")],
+    new FunctionConfig(
+      "mergeArrays",
+      [
+        {
+          name: "arr1",
+          paramType: new AbstractType(CompositeType.Array, new AbstractType(AtomicType.Integer)),
+        },
+      ],
+      new AbstractType(CompositeType.Array, new AbstractType(AtomicType.Integer))
+    ),
+    ["Python", "Java", "Go"]
+  )
+);
+
 
 const predefinedCategories = Object.values(PredefinedCategory);
 const predefinedLanguages = Object.values(PredefinedSupportedLanguage);
@@ -84,13 +79,42 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with event.data
   console.log(event.data);
 }
-
+// //TODO: repalce with more efficient way to update state like this:
+// const updateState = (key: string, value: any, index?: number, subKey?: string) => {
+//   console.log("Updating state with:");
+//   console.log("Updating state with:", key, value, index, subKey);
+//   // Handle updates for nested objects or arrays
+//   if (index !== undefined && subKey !== undefined) {
+//     // Updating a specific subKey in an array (e.g., examples[index].parameters)
+//     if (Array.isArray(state[key])) {
+//       const targetArray = state[key] as any[];
+//       if (targetArray[index]) {
+//         targetArray[index][subKey] = value;
+//       }
+//     }
+//   } else if (index !== undefined) {
+//     // Updating a specific element in an array (e.g., examples[index])
+//     if (Array.isArray(state[key])) {
+//       const targetArray = state[key] as any[];
+//       if (targetArray[index]) {
+//         targetArray[index] = value;
+//       }
+//     }
+//   } else {
+//     // Updating top-level properties (e.g., title, description, etc.)
+//     (state as any)[key] = value;
+//   }
+// };
 function updateState(newState: any) {
+  console.log("Updating state with:");
+  console.log("Updating state with:", newState);
+
   Object.assign(state, newState);
 }
 </script>
 <template>
   <div>
+    <!-- <pre class="text-xs leading-none overflow-auto max-h-64">{{ JSON.stringify(state, null, 2) }}</pre> -->
     <UCard
       :ui="{
         base: 'h-full flex flex-col',
