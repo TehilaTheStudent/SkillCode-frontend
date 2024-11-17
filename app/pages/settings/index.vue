@@ -1,57 +1,55 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from '#ui/types'
+import type { FormError, FormSubmitEvent } from "#ui/types";
 
-const fileRef = ref<HTMLInputElement>()
-const isDeleteAccountModalOpen = ref(false)
+const fileRef = ref<HTMLInputElement>();
+const isDeleteAccountModalOpen = ref(false);
 
 const state = reactive({
-  name: 'Benjamin Canac',
-  email: 'ben@nuxtlabs.com',
-  username: 'benjamincanac',
-  avatar: '',
-  bio: '',
-  password_current: '',
-  password_new: ''
-})
+  name: "Benjamin Canac",
+  email: "ben@nuxtlabs.com",
+  username: "benjamincanac",
+  avatar: "",
+  bio: "",
+  password_current: "",
+  password_new: "",
+});
 
-const toast = useToast()
+const toast = useToast();
 
 function validate(state: any): FormError[] {
-  const errors = []
-  if (!state.name) errors.push({ path: 'name', message: 'Please enter your name.' })
-  if (!state.email) errors.push({ path: 'email', message: 'Please enter your email.' })
-  if ((state.password_current && !state.password_new) || (!state.password_current && state.password_new)) errors.push({ path: 'password', message: 'Please enter a valid password.' })
-  return errors
+  const errors = [];
+  if (!state.name) errors.push({ path: "name", message: "Please enter your name." });
+  if (!state.email) errors.push({ path: "email", message: "Please enter your email." });
+  if ((state.password_current && !state.password_new) || (!state.password_current && state.password_new))
+    errors.push({ path: "password", message: "Please enter a valid password." });
+  return errors;
 }
 
 function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
+  const input = e.target as HTMLInputElement;
 
   if (!input.files?.length) {
-    return
+    return;
   }
 
-  state.avatar = URL.createObjectURL(input.files[0])
+  state.avatar = URL.createObjectURL(input.files[0]);
 }
 
 function onFileClick() {
-  fileRef.value?.click()
+  fileRef.value?.click();
 }
 
 async function onSubmit(event: FormSubmitEvent<any>) {
   // Do something with data
-  console.log(event.data)
+  // console.log(event.data);
 
-  toast.add({ title: 'Profile updated', icon: 'i-heroicons-check-circle' })
+  toast.add({ title: "Profile updated", icon: "i-heroicons-check-circle" });
 }
 </script>
 
 <template>
   <UDashboardPanelContent class="pb-24">
-    <UDashboardSection
-      title="Theme"
-      description="Customize the look and feel of your dashboard."
-    >
+    <UDashboardSection title="Theme" description="Customize the look and feel of your dashboard.">
       <template #links>
         <UColorModeSelect color="gray" />
       </template>
@@ -59,45 +57,29 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 
     <UDivider class="mb-4" />
 
-    <UForm
-      :state="state"
-      :validate="validate"
-      :validate-on="['submit']"
-      @submit="onSubmit"
-    >
+    <UForm :state="state" :validate="validate" :validate-on="['submit']" @submit="onSubmit">
       <UDashboardSection
         title="Profile"
         description="This information will be displayed publicly so be careful what you share."
       >
         <template #links>
-          <UButton
-            type="submit"
-            label="Save changes"
-            color="black"
-          />
+          <UButton type="submit" label="Save changes" color="black" />
         </template>
 
         <UFormGroup
           name="name"
           label="Name"
           description="Will appear on receipts, invoices, and other communication."
-          required
           class="grid grid-cols-2 gap-2 items-center"
           :ui="{ container: '' }"
         >
-          <UInput
-            v-model="state.name"
-            autocomplete="off"
-            icon="i-heroicons-user"
-            size="md"
-          />
+          <UInput v-model="state.name" autocomplete="off" icon="i-heroicons-user" size="md" />
         </UFormGroup>
 
         <UFormGroup
           name="email"
           label="Email"
           description="Used to sign in, for email receipts and product updates."
-          required
           class="grid grid-cols-2 gap-2"
           :ui="{ container: '' }"
         >
@@ -114,7 +96,6 @@ async function onSubmit(event: FormSubmitEvent<any>) {
           name="username"
           label="Username"
           description="Your unique username for logging in and your profile URL."
-          required
           class="grid grid-cols-2 gap-2"
           :ui="{ container: '' }"
         >
@@ -138,18 +119,9 @@ async function onSubmit(event: FormSubmitEvent<any>) {
           help="JPG, GIF or PNG. 1MB Max."
           :ui="{ container: 'flex flex-wrap items-center gap-3', help: 'mt-0' }"
         >
-          <UAvatar
-            :src="state.avatar"
-            :alt="state.name"
-            size="lg"
-          />
+          <UAvatar :src="state.avatar" :alt="state.name" size="lg" />
 
-          <UButton
-            label="Choose"
-            color="white"
-            size="md"
-            @click="onFileClick"
-          />
+          <UButton label="Choose" color="white" size="md" @click="onFileClick" />
 
           <input
             ref="fileRef"
@@ -157,7 +129,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
             class="hidden"
             accept=".jpg, .jpeg, .png, .gif"
             @change="onFileChange"
-          >
+          />
         </UFormGroup>
 
         <UFormGroup
@@ -167,12 +139,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
           class="grid grid-cols-2 gap-2"
           :ui="{ container: '' }"
         >
-          <UTextarea
-            v-model="state.bio"
-            :rows="5"
-            autoresize
-            size="md"
-          />
+          <UTextarea v-model="state.bio" :rows="5" autoresize size="md" />
         </UFormGroup>
 
         <UFormGroup
@@ -208,12 +175,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
       description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
     >
       <div>
-        <UButton
-          color="red"
-          label="Delete account"
-          size="md"
-          @click="isDeleteAccountModalOpen = true"
-        />
+        <UButton color="red" label="Delete account" size="md" @click="isDeleteAccountModalOpen = true" />
       </div>
     </UDashboardSection>
 

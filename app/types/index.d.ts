@@ -128,19 +128,55 @@ function textify(value: string): string {
 
 /**
  * @entity class
- * @fields type, tChildren
+ * @fields type, type_children
  */
 export class AbstractType {
   public type: CompositeType | AtomicType;
-  public tChildren?: AbstractType;
+  public type_children?: AbstractType;
 
-  constructor(type: CompositeType | AtomicType, tChildren?: AbstractType) {
+  constructor(type: CompositeType | AtomicType, type_children?: AbstractType) {
     this.type = type;
-    if (Object.values(CompositeType).includes(type as CompositeType) && !tChildren) {
-      this.tChildren = new AbstractType(AtomicType.Integer);
-    } else {
-      this.tChildren = tChildren;
+
+    // Assign type_children iteratively
+    if (type_children) {
+      let current: AbstractType = this;
+      let child = type_children;
+
+      while (child) {
+        // Create a new AbstractType only when a child exists
+        current.type_children = new AbstractType(child.type);
+        current = current.type_children;
+        child = child.type_children;
+      }
     }
+  }
+
+  /**
+   * Assign children to the current AbstractType iteratively.
+   */
+  setChildrenIteratively(type_children?: AbstractType) {
+    let current: AbstractType = this;
+
+    if (!type_children) {
+      current.type_children = undefined;
+      return;
+    }
+
+    let child = type_children;
+
+    while (child) {
+      // Create or update the child iteratively
+      if (!current.type_children) {
+        current.type_children = new AbstractType(child.type);
+      } else {
+        current.type_children.type = child.type;
+      }
+      current = current.type_children;
+      child = child.type_children;
+    }
+
+    // Ensure any remaining type_children in the chain are cleared
+    current.type_children = undefined;
   }
 
   /**
@@ -148,9 +184,9 @@ export class AbstractType {
    * Recursively prints composite types with children.
    */
   toPrint(): string {
-    if (this.tChildren) {
+    if (this.type_children) {
       // Recursive case: composite type with children
-      return `${textify(this.type)} < ${this.tChildren.toPrint()} >`;
+      return `${textify(this.type)} < ${this.type_children.toPrint()} >`;
     }
     // Base case: atomic type
     return textify(this.type);
@@ -161,12 +197,12 @@ export class AbstractType {
   }
 
   getTail(): AbstractType {
-    if (!this.tChildren) {
+    if (!this.type_children) {
       // Base case: No children, return this
       return this;
     }
     // Recursive case: Traverse to the deepest child
-    return this.tChildren.getTail();
+    return this.type_children.getTail();
   }
 
   /**
@@ -174,21 +210,21 @@ export class AbstractType {
    * If it's the only element, return "VoidType" or reset state.
    */
   removeTail(): AbstractType {
-    if (!this.tChildren) {
+    if (!this.type_children) {
       // Base case: Reset to "VoidType" or clear state if atomic
       this.type = AtomicType.Integer; // Reset to default atomic type
       return this;
     }
 
     // Recursive case: Remove from the deepest child
-    if (!this.tChildren.tChildren) {
+    if (!this.type_children.type_children) {
       // If the immediate child is atomic, remove it
-      this.tChildren = undefined;
+      this.type_children = undefined;
       return this;
     }
 
     // Recursive traversal
-    this.tChildren.removeTail();
+    this.type_children.removeTail();
     return this;
   }
 
@@ -197,14 +233,14 @@ export class AbstractType {
    * If the current type is atomic, converts it to a composite type with children.
    */
   addTail(newAtomicType: AtomicType = AtomicType.Integer): AbstractType {
-    if (!this.tChildren) {
+    if (!this.type_children) {
       // If no child exists, add a new atomic child
-      this.tChildren = new AbstractType(newAtomicType);
+      this.type_children = new AbstractType(newAtomicType);
       return this;
     }
 
     // Recursive case: Add to the deepest child
-    this.tChildren.addTail(newAtomicType);
+    this.type_children.addTail(newAtomicType);
     return this;
   }
 
@@ -212,9 +248,9 @@ export class AbstractType {
    * Convert the AbstractType hierarchy to a flat list of types.
    */
   toList(): string[] {
-    if (this.tChildren) {
+    if (this.type_children) {
       // Recursive case: Flatten the hierarchy
-      return [textify(this.type), ...this.tChildren.toList()];
+      return [textify(this.type), ...this.type_children.toList()];
     }
 
     // Base case: Return the single type
@@ -227,18 +263,18 @@ export class AbstractType {
   setVarType(index: number, newType: CompositeType | AtomicType): void {
     const typeList = this.toList();
     if (index < 0 || index >= typeList.length) {
-      console.log("Index out of bounds");
+      // console.log("Index out of bounds");
       return; // Index out of bounds
     }
 
     let current: AbstractType = this;
 
     for (let i = 0; i < index; i++) {
-      if (!current.tChildren) {
-        console.log("Invalid hierarchy, no further children");
+      if (!current.type_children) {
+        // console.log("Invalid hierarchy, no further children");
         return; //
       }
-      current = current.tChildren;
+      current = current.type_children;
     }
 
     // Update the type
@@ -247,12 +283,12 @@ export class AbstractType {
     // Handle edge cases
     if (index === typeList.length - 1 && Object.values(CompositeType).includes(newType as CompositeType)) {
       // If the last type is set to a composite, add an Integer child
-      if (!current.tChildren) {
-        current.tChildren = new AbstractType(AtomicType.Integer);
+      if (!current.type_children) {
+        current.type_children = new AbstractType(AtomicType.Integer);
       }
     } else if (Object.values(AtomicType).includes(newType as AtomicType)) {
       // If a middle type is set to atomic, truncate its children
-      current.tChildren = undefined;
+      current.type_children = undefined;
     }
   }
 
@@ -266,10 +302,10 @@ export class AbstractType {
     }
     let current: AbstractType = this;
     for (let i = 0; i < index; i++) {
-      if (!current.tChildren) {
+      if (!current.type_children) {
         // throw new Error("Invalid type hierarchy");
       }
-      current = current.tChildren;
+      current = current.type_children;
     }
     return current.type;
   }
@@ -282,47 +318,47 @@ export class AbstractType {
   //   this.type = value;
   // }
 
-  // get tChildren(): AbstractType | undefined {
-  //   return this.tChildren;
+  // get type_children(): AbstractType | undefined {
+  //   return this.type_children;
   // }
 
-  // set tChildren(value: AbstractType | undefined) {
+  // set type_children(value: AbstractType | undefined) {
   //   if (Object.values(AtomicType).includes(this.type as AtomicType)) {
   //     if (value) {
   //       // // throw new Error(`Type '${this.type}' cannot have children.`);
   //     }
-  //     this.tChildren = undefined;
+  //     this.type_children = undefined;
   //   } else if (Object.values(CompositeType).includes(this.type as CompositeType)) {
-  //     this.tChildren = value || new AbstractType(AtomicType.Integer);
+  //     this.type_children = value || new AbstractType(AtomicType.Integer);
   //   }
   // }
 }
 
 /**
  * @entity interface
- * @fields name, paramType
+ * @fields name, param_type
  */
 export interface Parameter {
   name: string;
-  paramType: AbstractType;
+  param_type: AbstractType;
 }
 
 /**
  * @entity class
- * @fields name, parameters, returnType
+ * @fields name, parameters, return_type
  */
 export class FunctionConfig {
   public name: string;
   public parameters: Parameter[] | VoidType;
-  public returnType: AbstractType | VoidType;
+  public return_type: AbstractType | VoidType;
 
-  constructor(name: string, parameters: Parameter[] | VoidType, returnType: AbstractType | VoidType) {
-    if (parameters === "VoidType" && returnType === "VoidType") {
-      // // throw new Error("Both parameters and returnType cannot be 'VoidType'.");
+  constructor(name: string, parameters: Parameter[] | VoidType, return_type: AbstractType | VoidType) {
+    if (parameters === "VoidType" && return_type === "VoidType") {
+      // // throw new Error("Both parameters and return_type cannot be 'VoidType'.");
     }
     this.name = name;
     this.parameters = parameters;
-    this.returnType = returnType;
+    this.return_type = return_type;
   }
 
   // get name(): string {
@@ -338,36 +374,36 @@ export class FunctionConfig {
   // }
 
   // set parameters(value: Parameter[] | VoidType) {
-  //   if (value === "VoidType" && this.returnType === "VoidType") {
-  //     // // throw new Error("Both parameters and returnType cannot be 'VoidType'.");
+  //   if (value === "VoidType" && this.return_type === "VoidType") {
+  //     // // throw new Error("Both parameters and return_type cannot be 'VoidType'.");
   //   }
   //   this.parameters = value;
   // }
 
-  // get returnType(): AbstractType | VoidType {
-  //   return this.returnType;
+  // get return_type(): AbstractType | VoidType {
+  //   return this.return_type;
   // }
 
-  // set returnType(value: AbstractType | VoidType) {
+  // set return_type(value: AbstractType | VoidType) {
   //   if (this.parameters === "VoidType" && value === "VoidType") {
-  //     // // throw new Error("Both parameters and returnType cannot be 'VoidType'.");
+  //     // // throw new Error("Both parameters and return_type cannot be 'VoidType'.");
   //   }
-  //   this.returnType = value;
+  //   this.return_type = value;
   // }
 }
 
 /**
  * @entity class
- * @fields parameters, expectedOutput
+ * @fields parameters, expected_output
  */
 export class InputOutput {
   public parameters?: string[];
-  public expectedOutput?: string;
+  public expected_output?: string;
 
-  constructor(parameters?: string[], expectedOutput?: string, functionConfig?: FunctionConfig) {
-    if (functionConfig) {
-      if (functionConfig.parameters !== "VoidType") {
-        const paramCount = (functionConfig.parameters as Parameter[]).length;
+  constructor(parameters?: string[], expected_output?: string, function_config?: FunctionConfig) {
+    if (function_config) {
+      if (function_config.parameters !== "VoidType") {
+        const paramCount = (function_config.parameters as Parameter[]).length;
         if (!parameters || parameters.length !== paramCount) {
           // // throw new Error(
           //   `Expected ${paramCount} parameters, but got ${
@@ -377,15 +413,15 @@ export class InputOutput {
         }
       }
 
-      if (functionConfig.returnType !== "VoidType" && !expectedOutput) {
+      if (function_config.return_type !== "VoidType" && !expected_output) {
         // // throw new Error(
-        //   "Expected output is required when returnType is not 'VoidType'."
+        //   "Expected output is required when return_type is not 'VoidType'."
         // );
       }
     }
 
     this.parameters = parameters;
-    this.expectedOutput = expectedOutput;
+    this.expected_output = expected_output;
   }
 
   // get parameters(): string[] | undefined {
@@ -396,12 +432,12 @@ export class InputOutput {
   //   this.parameters = value;
   // }
 
-  // get expectedOutput(): string | undefined {
-  //   return this.expectedOutput;
+  // get expected_output(): string | undefined {
+  //   return this.expected_output;
   // }
 
-  // set expectedOutput(value: string | undefined) {
-  //   this.expectedOutput = value;
+  // set expected_output(value: string | undefined) {
+  //   this.expected_output = value;
   // }
 }
 
@@ -409,7 +445,7 @@ export type Difficulty = "Easy" | "Medium" | "Hard";
 
 /**
  * @entity class
- * @fields id, title, description, difficulty, category, stats, examples, testCases, functionConfig, languages
+ * @fields id, title, description, difficulty, category, stats, examples, test_cases, function_config, languages
  */
 export class Question {
   static idCounter = 0;
@@ -420,28 +456,29 @@ export class Question {
   public category: PredefinedCategory;
   public stats: number = 0;
   public examples: InputOutput[];
-  public testCases: InputOutput[];
-  public functionConfig: FunctionConfig;
+  public test_cases: InputOutput[];
+  public function_config: FunctionConfig;
   public languages: SupportedLanguages[];
 
   constructor(
+    id?: string,
     title?: string,
     description?: string,
     difficulty?: string,
     category?: PredefinedCategory,
     examples?: InputOutput[],
-    testCases?: InputOutput[],
-    functionConfig?: FunctionConfig,
+    test_cases?: InputOutput[],
+    function_config?: FunctionConfig,
     languages?: PredefinedSupportedLanguage[]
   ) {
-    this.id = (Question.idCounter++).toString();
+    this.id = id || undefined;
     this.title = title || "";
     this.description = description || "";
     this.difficulty = difficulty || "Easy";
     this.category = category || PredefinedCategory.Array;
     this.examples = examples || [];
-    this.testCases = testCases || [];
-    this.functionConfig = functionConfig || new FunctionConfig("", [], new AbstractType("VoidType"));
+    this.test_cases = test_cases || [];
+    this.function_config = function_config || new FunctionConfig("", "VoidType", "VoidType");
     this.languages = languages || [];
 
     if (!examples || examples.length < 1) {
@@ -449,11 +486,11 @@ export class Question {
     }
     // this.examples = examples;
 
-    if (!testCases || testCases.length < 1) {
+    if (!test_cases || test_cases.length < 1) {
       // // throw new Error("At least one test case is required.");
     }
-    // this.testCases = testCases;
-    // this.functionConfig = functionConfig;
+    // this.test_cases = test_cases;
+    // this.function_config = function_config;
 
     if (!languages || languages.length < 1) {
       // // throw new Error("At least one language is required.");
@@ -516,23 +553,23 @@ export class Question {
   //   this.examples = value;
   // }
 
-  // get testCases(): InputOutput[] {
-  //   return this.testCases;
+  // get test_cases(): InputOutput[] {
+  //   return this.test_cases;
   // }
 
-  // set testCases(value: InputOutput[]) {
+  // set test_cases(value: InputOutput[]) {
   //   if (!value || value.length < 1) {
   //     // throw new Error("At least one test case is required.");
   //   }
-  //   this.testCases = value;
+  //   this.test_cases = value;
   // }
 
-  // get functionConfig(): FunctionConfig {
-  //   return this.functionConfig;
+  // get function_config(): FunctionConfig {
+  //   return this.function_config;
   // }
 
-  // set functionConfig(value: FunctionConfig) {
-  //   this.functionConfig = value;
+  // set function_config(value: FunctionConfig) {
+  //   this.function_config = value;
   // }
 
   // get languages(): (string | SupportedLanguages)[] {

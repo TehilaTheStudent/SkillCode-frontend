@@ -6,9 +6,9 @@ import { FunctionConfig, InputOutput } from "~/types/index.d";
 const props = defineProps<{
   item: InputOutput;
   index: number;
-  functionConfig: FunctionConfig; // The function configuration
+  function_config: FunctionConfig; // The function configuration
 }>();
-console.log(props.functionConfig);
+// console.log(props.function_config);
 // Helper function to check if parameters are VoidType
 const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
   return parameters === "VoidType";
@@ -16,14 +16,14 @@ const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-4 w-full border border-blue-500 p-4 rounded">
+  <div class="grid grid-cols-1 gap-8 w-full border border-blue-500 p-4 rounded">
     <div class="text-gray-600 font-bold">#{{ props.index + 1 }}</div>
     <!-- Dynamic Inputs Based on FunctionConfig -->
-    <div v-if="!isVoidType(props.functionConfig.parameters)">
+    <div v-if="!isVoidType(props.function_config.parameters)">
       <div
-        v-for="(param, paramIndex) in props.functionConfig.parameters"
+        v-for="(param, paramIndex) in props.function_config.parameters"
         :key="'param-' + paramIndex"
-        class="grid grid-cols-1 gap-2"
+        class="grid grid-cols-1 gap-4 mb-4"
       >
         <!-- Parameter Name and Input -->
         <div class="flex items-center gap-2">
@@ -39,7 +39,7 @@ const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
               <span
                 class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded border border-gray-200 overflow-hidden overflow-ellipsis whitespace-nowrap max-w-xs"
               >
-                {{ (param as Parameter).paramType.toPrint() }}</span
+                {{ (param as Parameter).param_type.toPrint() }}</span
               >
             </label>
           </div>
@@ -57,7 +57,7 @@ const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
     <div>
       <label class="font-medium">Expected Output:</label>
       <UInput
-        v-model="props.item.expectedOutput"
+        v-model="props.item.expected_output"
         :placeholder="'Enter Expected Output'"
         :name="'output-' + props.index"
         class="w-full"

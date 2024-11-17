@@ -14,7 +14,7 @@ import {
 } from "~/types/index.d"; //enums and classes
 import * as yup from "yup";
 import type { FormSubmitEvent } from "#ui/types";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const emit = defineEmits(["close", "updateState"]);
 const props = defineProps<{ selectedQuestion: Question; isEdit: boolean }>();
@@ -44,8 +44,8 @@ const items = [
 
 //form
 const schema = yup.object({
-  email: yup.string().email("Invalid email").required("Required"),
-  password: yup.string().min(8, "Must be at least 8 characters").required("Required"),
+  // email: yup.string().email("Invalid email").required("Required"),
+  // password: yup.string().min(8, "Must be at least 8 characters").required("Required"),
 });
 function handleFunctionParameters(parameters: Parameter[] | VoidType): Parameter[] | VoidType {
   if (parameters === "VoidType") {
@@ -55,47 +55,64 @@ function handleFunctionParameters(parameters: Parameter[] | VoidType): Parameter
   if (Array.isArray(parameters)) {
     return parameters.map((param) => ({
       name: param.name,
-      paramType:
-        param.paramType instanceof AbstractType
-          ? new AbstractType(param.paramType.type, param.paramType.tChildren)
-          : new AbstractType(AtomicType.Integer), // Default fallback
+      param_type: createAbstractType(param.param_type), // Use a helper function for clarity
     }));
   }
 
-  // Fallback to an empty array if parameters is invalid
-  return [];
+  return "VoidType";
+}
+
+/**
+ * Helper function to iteratively create an AbstractType instance.
+ */
+function createAbstractType(param_type: AbstractType): AbstractType {
+  const root = new AbstractType(param_type.type);
+  let current = root;
+  let child = param_type.type_children;
+
+  while (child) {
+    current.type_children = new AbstractType(child.type);
+    current = current.type_children;
+    child = child.type_children;
+  }
+
+  return root;
 }
 
 type Schema = yup.InferType<typeof schema>;
-
+// console.log(props.selectedQuestion.function_config);
 const state = reactive<Question>(
   props.isEdit
     ? new Question(
+        props.selectedQuestion.id,
         props.selectedQuestion.title,
         props.selectedQuestion.description,
         props.selectedQuestion.difficulty,
         props.selectedQuestion.category,
         props.selectedQuestion.examples.map(
-          (example) => new InputOutput(example.parameters, example.expectedOutput)
+          (example: InputOutput) => new InputOutput(example.parameters, example.expected_output)
         ),
         // [],
-        props.selectedQuestion.testCases.map(
-          (testCase) => new InputOutput(testCase.parameters, testCase.expectedOutput)
+        props.selectedQuestion.test_cases.map(
+          (testCase: InputOutput) => new InputOutput(testCase.parameters, testCase.expected_output)
         ),
         // [],
         new FunctionConfig(
-          props.selectedQuestion.functionConfig.name,
-          props.selectedQuestion.functionConfig.parameters === "VoidType"
+          props.selectedQuestion.function_config.name,
+          // "",
+          props.selectedQuestion.function_config.parameters === "VoidType"
             ? "VoidType"
-            : handleFunctionParameters(props.selectedQuestion.functionConfig.parameters),
-          // [],
+            : handleFunctionParameters(props.selectedQuestion.function_config.parameters),
+          // "VoidType",
 
-          props.selectedQuestion.functionConfig.returnType instanceof AbstractType
-            ? props.selectedQuestion.functionConfig.returnType
-            : "VoidType"
+          props.selectedQuestion.function_config.return_type === "VoidType"
+            ? "VoidType"
+            : new AbstractType(
+                props.selectedQuestion.function_config.return_type.type,
+                props.selectedQuestion.function_config.return_type?.type_children
+              )
         ),
         props.selectedQuestion.languages
-        // []
       )
     : new Question()
 );
@@ -104,9 +121,12 @@ const predefinedCategories = Object.values(PredefinedCategory);
 const predefinedLanguages = Object.values(PredefinedSupportedLanguage);
 
 const router = useRouter();
+const config = useRuntimeConfig();
+const apiUrl = `${config.public.backendUrl}/questions`;
+const toast = useToast();
 
 async function updateQuestion(id: string, updatedQuestion: Question) {
-  const response = await fetch(`/questions/${id}`, {
+  const response = await fetch(`${apiUrl}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -122,7 +142,7 @@ async function updateQuestion(id: string, updatedQuestion: Question) {
 }
 
 async function addQuestion(newQuestion: Question) {
-  const response = await fetch(`/questions`, {
+  const response = await fetch(`${apiUrl}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -138,55 +158,42 @@ async function addQuestion(newQuestion: Question) {
 }
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
+  // console.log("updatedQuestion");
+
   // Do something with event.data
-  console.log(event.data);
+  // console.log(event.data);
   try {
     if (props.isEdit) {
       await updateQuestion(props.selectedQuestion.id, state);
+      toast.add({ title: "Question updated successfully!", icon: "ep:success-filled", color: "green" });
     } else {
       await addQuestion(state);
+      toast.add({ title: "Question added successfully!", icon: "ep:success-filled", color: "green" });
     }
     emit("close");
   } catch (error) {
     console.error("Failed to submit the form:", error);
+    toast.add({
+      title: "Failed to submit the form.",
+      icon: "i-material-symbols:chat-error-rounded",
+      color: "red",
+    });
   }
 }
-// //TODO: repalce with more efficient way to update state like this:
-// const updateState = (key: string, value: any, index?: number, subKey?: string) => {
-//   console.log("Updating state with:");
-//   console.log("Updating state with:", key, value, index, subKey);
-//   // Handle updates for nested objects or arrays
-//   if (index !== undefined && subKey !== undefined) {
-//     // Updating a specific subKey in an array (e.g., examples[index].parameters)
-//     if (Array.isArray(state[key])) {
-//       const targetArray = state[key] as any[];
-//       if (targetArray[index]) {
-//         targetArray[index][subKey] = value;
-//       }
-//     }
-//   } else if (index !== undefined) {
-//     // Updating a specific element in an array (e.g., examples[index])
-//     if (Array.isArray(state[key])) {
-//       const targetArray = state[key] as any[];
-//       if (targetArray[index]) {
-//         targetArray[index] = value;
-//       }
-//     }
-//   } else {
-//     // Updating top-level properties (e.g., title, description, etc.)
-//     (state as any)[key] = value;
-//   }
-// };
+
 function updateState(newState: any) {
-  console.log("Updating state with:");
-  console.log("Updating state with:", newState);
+  // console.log("Updating state with:");
+  // console.log("Updating state with:", newState);
 
   Object.assign(state, newState);
 }
 </script>
 <template>
   <div>
-    <pre class="text-xs leading-none overflow-auto max-h-64">{{ JSON.stringify(state, null, 2) }}</pre>
+    <!-- <pre class="text-xs leading-none overflow-auto max-h-64">{{ JSON.stringify(state, null, 2) }}</pre> -->
+    <!-- <pre class="text-xs leading-none overflow-auto max-h-64">{{
+      JSON.stringify(props.selectedQuestion, null, 2)
+    }}</pre> -->
     <UCard
       :ui="{
         base: 'h-full flex flex-col',
@@ -211,7 +218,8 @@ function updateState(newState: any) {
           />
         </div>
       </template>
-      <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <!-- <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit"> -->
+      <UForm :state="state" class="space-y-4" @submit="onSubmit">
         <UButton type="submit"> Submit </UButton>
         <UTabs :items="items" class="w-full">
           <template #item="{ item }">

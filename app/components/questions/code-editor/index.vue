@@ -29,7 +29,7 @@ let editor: EditorView | null = null;
 onMounted(async () => {
   await nextTick(); // Wait for DOM to be available
 
-  console.log("Mounted QuestionsCodeEditor");
+  // console.log("Mounted QuestionsCodeEditor");
 
   if (editorContainer.value) {
     // Initialize the editor with 20 blank lines
@@ -69,7 +69,6 @@ watch(currentLanguage, (newLang) => {
 <template>
   <div>
     <!-- <ClientOnly> -->
-    <h1>fdsafdsaf</h1>
     <div class="space-y-4">
       Language Selector
       <div class="flex items-center space-x-4">

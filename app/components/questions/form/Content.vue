@@ -6,12 +6,11 @@ const props = defineProps<{ state: Question }>();
 const emit = defineEmits(["updateState"]);
 
 const editItem = (index: number, item: InputOutput, isExample: boolean) => {
-  console.log("Edit item");
+  // console.log("Edit item");
 };
-
 // Function to add a new item
 const addItem = (list: InputOutput[]) => {
-  list.push({ parameters: [], expectedOutput: "" });
+  list.push({ parameters: [], expected_output: "" });
 };
 
 // Function to remove an item
@@ -27,7 +26,7 @@ const removeItem = (list: InputOutput[], index: number) => {
       <QuestionsFormItemList
         :label="'Examples'"
         :items="props.state.examples"
-        :functionConfig="props.state.functionConfig"
+        :function_config="props.state.function_config"
         @addItem="() => addItem(props.state.examples)"
         @editItem="(index, newItem) => editItem(index, newItem, true)"
         @removeItem="(index) => removeItem(props.state.examples, index)"
@@ -37,10 +36,10 @@ const removeItem = (list: InputOutput[], index: number) => {
       <!-- Test Cases -->
       <QuestionsFormItemList
         :label="'Test Cases'"
-        :items="props.state.testCases"
-        :functionConfig="props.state.functionConfig"
-        @addItem="() => addItem(props.state.testCases)"
-        @removeItem="(index) => removeItem(props.state.testCases, index)"
+        :items="props.state.test_cases"
+        :function_config="props.state.function_config"
+        @addItem="() => addItem(props.state.test_cases)"
+        @removeItem="(index) => removeItem(props.state.test_cases, index)"
         @editItem="(index, newItem) => editItem(index, newItem, false)"
       />
     </div>

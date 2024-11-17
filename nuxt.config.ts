@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:8080/skillcode", // Backend base URL for API
+      backendUrl: process.env.BACKEND_URL || 'http://localhost:8080/skillcode',
     },
   },
   colorMode: {

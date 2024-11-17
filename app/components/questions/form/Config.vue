@@ -8,13 +8,13 @@ function updateState() {
   emit("updateState", props.state);
 }
 function updateParameters(parameters: Parameter[] | VoidType) {
-  console.log("updateParameters", parameters);
-  props.state.functionConfig.parameters = parameters;
+  // console.log("updateParameters", parameters);
+  props.state.function_config.parameters = parameters;
   updateState();
 }
-function updateReturnType(returnType: AbstractType | VoidType) {
-  console.log("updateReturnType", returnType);
-  props.state.functionConfig.returnType = returnType;
+function updatereturn_type(return_type: AbstractType | VoidType) {
+  // console.log("updatereturn_type", return_type);
+  props.state.function_config.return_type = return_type;
   updateState();
 }
 </script>
@@ -22,15 +22,15 @@ function updateReturnType(returnType: AbstractType | VoidType) {
 <template>
   <div>
     <UFormGroup label="Function Name" name="functionName">
-      <UInput v-model="props.state.functionConfig.name" />
+      <UInput v-model="props.state.function_config.name" />
     </UFormGroup>
     <QuestionsFormParametersSection
-      :parameters="props.state.functionConfig.parameters"
+      :parameters="props.state.function_config.parameters"
       @updateParameters="updateParameters"
     />
     <QuestionsFormReturnTypeSection
-      :returnType="props.state.functionConfig.returnType"
-      @updateReturnType="updateReturnType"
+      :return_type="props.state.function_config.return_type"
+      @updatereturn_type="updatereturn_type"
     />
   </div>
 </template>

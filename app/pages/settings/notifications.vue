@@ -4,42 +4,52 @@ const state = reactive<{ [key: string]: boolean }>({
   desktop: false,
   product_updates: true,
   weekly_digest: false,
-  important_updates: true
-})
+  important_updates: true,
+});
 
-const sections = [{
-  title: 'Notification channels',
-  description: 'Where can we notify you?',
-  fields: [{
-    name: 'email',
-    label: 'Email',
-    description: 'Receive a daily email digest.'
-  }, {
-    name: 'desktop',
-    label: 'Desktop',
-    description: 'Receive desktop notifications.'
-  }]
-}, {
-  title: 'Account updates',
-  description: 'Receive updates about Nuxt UI.',
-  fields: [{
-    name: 'weekly_digest',
-    label: 'Weekly digest',
-    description: 'Receive a weekly digest of news.'
-  }, {
-    name: 'product_updates',
-    label: 'Product updates',
-    description: 'Receive a monthly email with all new features and updates.'
-  }, {
-    name: 'important_updates',
-    label: 'Important updates',
-    description: 'Receive emails about important updates like security fixes, maintenance, etc.'
-  }]
-}]
+const sections = [
+  {
+    title: "Notification channels",
+    description: "Where can we notify you?",
+    fields: [
+      {
+        name: "email",
+        label: "Email",
+        description: "Receive a daily email digest.",
+      },
+      {
+        name: "desktop",
+        label: "Desktop",
+        description: "Receive desktop notifications.",
+      },
+    ],
+  },
+  {
+    title: "Account updates",
+    description: "Receive updates about Nuxt UI.",
+    fields: [
+      {
+        name: "weekly_digest",
+        label: "Weekly digest",
+        description: "Receive a weekly digest of news.",
+      },
+      {
+        name: "product_updates",
+        label: "Product updates",
+        description: "Receive a monthly email with all new features and updates.",
+      },
+      {
+        name: "important_updates",
+        label: "Important updates",
+        description: "Receive emails about important updates like security fixes, maintenance, etc.",
+      },
+    ],
+  },
+];
 
 async function onChange() {
   // Do something with data
-  console.log(state)
+  // console.log(state)
 }
 </script>
 
@@ -63,13 +73,9 @@ async function onChange() {
           class="flex items-center justify-between pt-4 first:pt-0 gap-2"
           :ui="{ container: 'flex' }"
         >
-          <UToggle
-            v-model="state[field.name]"
-            size="md"
-            @update:model-value="onChange"
-          />
+          <UToggle v-model="state[field.name]" size="md" @update:model-value="onChange" />
         </UFormGroup>
       </UCard>
     </UDashboardSection>
-  </udashboardpanelcontent>
+  </UDashboardPanelContent>
 </template>

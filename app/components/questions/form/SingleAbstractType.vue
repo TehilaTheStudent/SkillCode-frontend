@@ -6,7 +6,7 @@ const props = defineProps<{
   index: number;
   selectedVarTypeInIndex: string;
 }>();
-console.log(props.selectedVarTypeInIndex);
+// console.log(props.selectedVarTypeInIndex);
 const selected = ref<string>(props.selectedVarTypeInIndex);
 
 const emit = defineEmits<{
@@ -15,7 +15,7 @@ const emit = defineEmits<{
 
 const onSelect = (value: CompositeType | AtomicType) => {
   selected.value = value;
-  console.log("Selected value:", value);
+  // console.log("Selected value:", value);
   emit("update-in-index", { index: props.index, value: value });
 };
 </script>

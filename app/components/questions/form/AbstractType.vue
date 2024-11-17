@@ -11,18 +11,15 @@ watch(abstractTypeRoot, (newVal: AbstractType) => {
   emit("update", newVal);
 });
 
-function selectedVarTypeInIndex(payload:{ index: number, value: CompositeType | AtomicType}) {
-  console.log(payload);
-  abstractTypeRoot.value.setVarType(payload.index,payload.value);
+function selectedVarTypeInIndex(payload: { index: number; value: CompositeType | AtomicType }) {
+  // // console.log(payload);
+  abstractTypeRoot.value.setVarType(payload.index, payload.value);
 }
-
-
-
 </script>
 <template>
   <div>
     <!-- Select Type Header with String Representation -->
-    <h3 class="font-bold text-lg mb-4 overflow-x-auto whitespace-nowrap">{{abstractTypeRoot.toPrint() }}</h3>
+    <h3 class="font-bold text-lg mb-4 overflow-x-auto whitespace-nowrap">{{ abstractTypeRoot.toPrint() }}</h3>
 
     <!-- Abstract Type Form List -->
     <div v-for="(varType, index) in abstractTypeRoot.toList()" :key="index" class="mb-4">

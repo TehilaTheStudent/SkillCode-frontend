@@ -11,7 +11,7 @@ const openEditModal = (list: InputOutput, index: number) => {
 const props = defineProps<{
   label: string;
   items: InputOutput[];
-  functionConfig: FunctionConfig;
+  function_config: FunctionConfig;
 }>();
 const emit = defineEmits(["addItem", "removeItem", "editItem"]);
 const editItemIndex = ref<number | null>(null);
@@ -31,14 +31,27 @@ const saveEdit = () => {
         <div class="flex justify-between items-center">
           <span>
             {{
-              item.parameters.length > 0 || item.expectedOutput!=""
-                ? item.parameters.join(", ") + " => " + item.expectedOutput
+              item.parameters.length > 0 || item.expected_output != ""
+                ? item.parameters.join(", ") + " => " + item.expected_output
                 : "not provided"
             }}
           </span>
           <div>
-            <UButton size="sm" color="primary" icon="i-heroicons-pencil-square" class="mr-2" @click="openEditModal(props.items[index], index)">Edit</UButton>
-            <UButton size="sm" color="red" icon="i-material-symbols:delete-forever" @click="emit('removeItem', index)">Remove</UButton>
+            <UButton
+              size="sm"
+              color="primary"
+              icon="i-heroicons-pencil-square"
+              class="mr-2"
+              @click="openEditModal(props.items[index], index)"
+              >Edit</UButton
+            >
+            <UButton
+              size="sm"
+              color="red"
+              icon="i-material-symbols:delete-forever"
+              @click="emit('removeItem', index)"
+              >Remove</UButton
+            >
           </div>
         </div>
       </div>
@@ -61,7 +74,7 @@ const saveEdit = () => {
     <QuestionsFormInputOutput
       :item="editedItem"
       :index="editItemIndex"
-      :functionConfig="props.functionConfig"
+      :function_config="props.function_config"
     />
 
     <template #footer>

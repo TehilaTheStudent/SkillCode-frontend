@@ -40,7 +40,6 @@ const emit = defineEmits(["updateState"]);
     <UFormGroup :label="'Languages'" :name="'languages'">
       <USelectMenu
         v-model="props.state.languages"
-        required
         :options="Object.values(PredefinedSupportedLanguage)"
         multiple
       />

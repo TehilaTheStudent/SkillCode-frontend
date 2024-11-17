@@ -8,7 +8,7 @@ const openAbstractTypeSlide = ref<boolean[]>([]);
 
 function addParameter() {
   const parameters = props.parameters === "VoidType" ? [] : [...props.parameters];
-  parameters.push({ name: "number", paramType: new AbstractType(AtomicType.Integer) });
+  parameters.push({ name: "number", param_type: new AbstractType(AtomicType.Integer) });
   openAbstractTypeSlide.value.push(false); // Add the corresponding slide state
   emit("updateParameters", parameters);
 }
@@ -26,7 +26,7 @@ function removeParameter(index: number) {
 function updateParameter(index: number, newType: AbstractType) {
   if (props.parameters !== "VoidType") {
     const parameters = [...props.parameters];
-    parameters[index] = { ...parameters[index], paramType: newType }; // Ensure immutability
+    parameters[index] = { ...parameters[index], param_type: newType }; // Ensure immutability
     emit("updateParameters", parameters);
   }
 }
@@ -40,8 +40,6 @@ watch(
   },
   { immediate: true }
 );
-
-
 </script>
 
 <template>
@@ -57,7 +55,7 @@ watch(
           <UInput v-model="param.name" placeholder="Parameter Name" :name="'paramName' + index" size="sm" />
         </div>
         <div class="font-bold text-lg mb-4 overflow-x-auto whitespace-nowrap">
-          {{ param.paramType.toPrint() }}
+          {{ param.param_type.toPrint() }}
         </div>
         <div class="flex-1 text-right space-x-2">
           <UButton
@@ -72,7 +70,7 @@ watch(
             <template #header> Edit Parameter {{ props.parameters[index].name }} </template>
             <template #default>
               <QuestionsFormAbstractType
-                :abstractType="props.parameters[index].paramType"
+                :abstractType="props.parameters[index].param_type"
                 @update="(newVal) => updateParameter(index, newVal)"
               />
             </template>

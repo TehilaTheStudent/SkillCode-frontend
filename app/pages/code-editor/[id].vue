@@ -10,9 +10,10 @@ const route = useRoute();
 const questionId = route.params.id;
 const language = ref("javascript"); // Default language
 const showModal = ref(false); // Add showModal ref
-
+const config = useRuntimeConfig();
+const apiUrl = `${config.public.backendUrl}/questions`;
 // Fetch the question details
-const { data: question } = await useFetch<Question>(`/api/questions/${questionId}`, {
+const { data: question } = await useFetch<Question>(`${apiUrl}/${questionId}`, {
   default: () => null,
 });
 
@@ -33,7 +34,7 @@ onMounted(() => {
 
 // Submit code to the backend
 const submitSolution = async () => {
-  const response = await fetch(`/api/questions/${questionId}/submit`, {
+  const response = await fetch(`${apiUrl}/${questionId}/test`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

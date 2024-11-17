@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { row } from "@unovis/ts/components/timeline/style";
 import { InputOutput, Question } from "~/types/index.d";
-const config = useRuntimeConfig();
 const router = useRouter();
 const toast = useToast();
 const defaultColumns = [
-  { key: "id", label: "ID" },
+  // { key: "id", label: "ID" }, // Remove ID column
   { key: "title", label: "Title" },
   { key: "description", label: "Description" }, // New column for description
   { key: "category", label: "Category", sortable: true },
@@ -29,6 +28,34 @@ const currentSelectedQuestion = ref<Question | null>(null);
 const formIsEdit = ref(false);
 const isDeleteModalOpen = ref(false);
 const questionToDelete = ref<Question | null>(null);
+const config = useRuntimeConfig();
+const apiUrl = `${config.public.backendUrl}/questions`;
+
+const questions = ref<Question[]>([]); // Replace useFetch with a ref
+  const pending = ref(false); // Replace useFetch pending state
+
+
+
+
+async function refreshQuestions() {
+  pending.value = true; // Start loading
+  try {
+    const response = await $fetch<Question[]>(apiUrl, {
+      query: query.value, // Pass computed query parameters
+    });
+    questions.value = response; // Update questions with fetched data
+  } catch (error) {
+    console.error("Error fetching questions:", error);
+    questions.value = []; // Reset questions on error
+  } finally {
+    pending.value = false; // End loading
+  }
+}
+
+// Trigger data fetching when the component is mounted
+onMounted(() => {
+  refreshQuestions();
+});
 
 function onViewDescription(row: Question) {
   descriptionTitle.value = row.title || "";
@@ -51,11 +78,10 @@ const query = computed(() => ({
   order: sort.value.direction,
 }));
 
-const { data: questions, pending } = await useFetch<Question[]>("/api/questions", {
-  query, // Pass query parameters if needed
-  default: () => [],
-});
-
+// const { data: questions, pending } = await useFetch<Question[]>(apiUrl, {
+//   query, // Pass query parameters if needed
+//   default: () => [],
+// });
 const defaultCategories = questions.value.reduce((acc, question) => {
   if (!acc.includes(question.category)) {
     acc.push(question.category);
@@ -85,10 +111,15 @@ function onEdit(row: Question) {
   onOpenQuestionForm(row, true);
 }
 
+function onQuestionFormClose() {
+  isOpenFormModal.value = false;
+  refreshQuestions();
+}
+
 async function onDeleteConfirm() {
   if (questionToDelete.value) {
     try {
-      await $fetch(`/api/questions/${questionToDelete.value.id}`, { method: "DELETE" });
+      await $fetch(`${apiUrl}/${questionToDelete.value.id}`, { method: "DELETE" });
       questions.value = questions.value.filter((q) => q.id !== questionToDelete.value!.id);
       toast.add({ icon: "i-heroicons-check-circle", title: "Question deleted successfully", color: "green" });
     } catch (error) {
@@ -178,7 +209,7 @@ defineShortcuts({
       </UDashboardModal>
       <UModal v-model="isOpenFormModal" fullscreen>
         <QuestionsFormTabs
-          @close="isOpenFormModal = false"
+          @close="onQuestionFormClose"
           :selectedQuestion="currentSelectedQuestion"
           :isEdit="formIsEdit"
         />
@@ -194,11 +225,6 @@ defineShortcuts({
         :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
         @row-click="onRowClick"
       >
-        <!-- ID column -->
-        <template #id-data="{ row }">
-          <span>{{ row.id }}</span>
-        </template>
-
         <!-- Title column -->
         <template #title-data="{ row }">
           <span class="text-gray-900 dark:text-white font-medium truncate w-10">{{
