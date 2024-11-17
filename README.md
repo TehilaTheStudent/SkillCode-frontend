@@ -13,3 +13,6 @@
 - responsivness
 - connect to backend
 - error handling in submit form
+- optimize fetches from the backend with pick, use: refresh, pending,error
+- create shared state with useState/pinia
+- check what is middleware

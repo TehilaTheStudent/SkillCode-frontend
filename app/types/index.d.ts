@@ -98,6 +98,7 @@ export enum PredefinedSupportedLanguage {
   Java = "Java",
   Go = "Go",
   CSharp = "CSharp",
+  Cpp = "Cpp",
 }
 
 /**
@@ -109,6 +110,8 @@ export enum PredefinedCategory {
   String = "String",
   Tree = "Tree",
   DynamicProgramming = "DynamicProgramming",
+  LinkedList = "LinkedList",
+  Matrix = "Matrix",
 }
 
 export function textifyEnum<T>(enumObj: T, value: T[keyof T]): string {
@@ -432,7 +435,7 @@ export class Question {
     functionConfig: FunctionConfig,
     languages: (string | SupportedLanguages)[]
   ) {
-    this.publicid = (Question.idCounter++).toString();
+    this.id = (Question.idCounter++).toString();
     this.title = title;
     this.description = description;
     this.difficulty = difficulty;

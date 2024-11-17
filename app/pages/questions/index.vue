@@ -33,7 +33,7 @@ function onViewDescription(row: Question) {
 }
 
 const truncateTitle = (title: string) => {
-  return title.length > 30 ? title.slice(0, 30) + "..." : title;
+  return title.length > 20 ? title.slice(0, 20) + "..." : title;
 };
 
 const columns = computed(() => defaultColumns.filter((column) => selectedColumns.value.includes(column)));
@@ -167,14 +167,19 @@ defineShortcuts({
         :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
         @row-click="onRowClick"
       >
+        <!-- ID column -->
+        <template #id-data="{ row }">
+          <span>{{ row.id }}</span>
+        </template>
+
         <!-- Title column -->
         <template #title-data="{ row }">
-          <span class="text-gray-900 dark:text-white font-medium">{{ truncateTitle(row.title) }}</span>
+          <span class="text-gray-900 dark:text-white font-medium truncate w-10">{{ truncateTitle(row.title) }}</span>
         </template>
 
         <!-- Description column -->
         <template #description-data="{ row }">
-          <div class="flex justify-center">
+          <div class="flex justify-center truncate w-10">
             <UTooltip text="View Description & Examples">
               <UButton icon="i-heroicons-eye" size="md" variant="ghost" @click="onViewDescription(row)" />
             </UTooltip>
@@ -203,6 +208,16 @@ defineShortcuts({
         <!-- Actions column -->
         <template #actions-data="{ row }">
           <div class="flex space-x-2">
+            <UTooltip text="Solve">
+              <UButton
+                icon="i-material-symbols:code-blocks"
+                size="md"
+                variant="solid"
+                @click="onRowClick(row)"
+              >
+                Solve
+              </UButton>
+            </UTooltip>
             <UTooltip text="Edit">
               <UButton icon="i-heroicons-pencil" size="xs" variant="ghost" @click="onEdit(row)" />
             </UTooltip>
