@@ -4,6 +4,7 @@ const model = defineModel({
 })
 
 const toast = useToast()
+const emit = defineEmits(["confirm"]);
 
 const loading = ref(false)
 
@@ -12,8 +13,8 @@ function onDelete() {
 
   setTimeout(() => {
     loading.value = false
-    toast.add({ icon: 'i-heroicons-check-circle', title: 'Your account has been deleted', color: 'red' })
     model.value = false
+    emit("confirm");
   }, 2000)
 }
 </script>
@@ -21,8 +22,8 @@ function onDelete() {
 <template>
   <UDashboardModal
     v-model="model"
-    title="Delete account"
-    description="Are you sure you want to delete your account?"
+    title="Delete question"
+    description="Are you sure you want to delete your question?"
     icon="i-heroicons-exclamation-circle"
     prevent-close
     :close-button="null"

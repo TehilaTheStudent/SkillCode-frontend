@@ -59,6 +59,7 @@ const submitSolution = async () => {
 </style>
 
 <template>
+  <div></div>
   <div class="w-full p-4 space-y-6">
     <!-- Title -->
     <h1 class="text-2xl font-bold text-gray-800">{{ question?.title || "Loading..." }}</h1>
@@ -104,11 +105,11 @@ const submitSolution = async () => {
       </div>
     </div>
     <!-- <ClientOnly> -->
-      <QuestionsCodeEditor
-        :modelValue="code"
-        :supportedLanguages="question.languages"
-        @update:modelValue="code = $event"
-      />
+    <QuestionsCodeEditor
+      :modelValue="code"
+      :supportedLanguages="question.languages"
+      @update:modelValue="code = $event"
+    />
     <!-- </ClientOnly> -->
 
     <!-- Submit Button -->

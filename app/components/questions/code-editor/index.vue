@@ -30,12 +30,10 @@ onMounted(async () => {
   await nextTick(); // Wait for DOM to be available
 
   console.log("Mounted QuestionsCodeEditor");
-  console.log("Editor Container:", editorContainer.value);
-  console.log("Supported Languages:", props.supportedLanguages);
 
   if (editorContainer.value) {
     // Initialize the editor with 20 blank lines
-    const initialContent = props.modelValue + "\n".repeat(20);
+    const initialContent = props.modelValue + "\n".repeat(16);
 
     editor = new EditorView({
       doc: initialContent, // Initial code with 20 blank lines
@@ -69,9 +67,11 @@ watch(currentLanguage, (newLang) => {
 </script>
 
 <template>
-  <template>
+  <div>
+    <!-- <ClientOnly> -->
+    <h1>fdsafdsaf</h1>
     <div class="space-y-4">
-      <!-- Language Selector -->
+      Language Selector
       <div class="flex items-center space-x-4">
         <label for="language" class="font-medium">Select Language:</label>
         <select
@@ -91,5 +91,6 @@ watch(currentLanguage, (newLang) => {
         <div ref="editorContainer" class="h-80 border rounded overflow-scroll bg-gray-50"></div>
       </div>
     </div>
-  </template>
+    <!-- </ClientOnly> -->
+  </div>
 </template>

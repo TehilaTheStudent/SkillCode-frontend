@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 //Component to hold the 3 steps tabs in filling new question form
 //Used inside the modal, this has the submit button is the parent of Question state
-import type { Parameter, Difficulty } from "~/types"; //interfaces and types
+import type { Parameter, Difficulty, VoidType } from "~/types"; //interfaces and types
 import {
   PredefinedCategory,
   PredefinedSupportedLanguage,
@@ -14,9 +14,10 @@ import {
 } from "~/types/index.d"; //enums and classes
 import * as yup from "yup";
 import type { FormSubmitEvent } from "#ui/types";
+import { useRouter } from 'vue-router';
 
 const emit = defineEmits(["close", "updateState"]);
-const props = defineProps<{ selectedQuestion: Question }>();
+const props = defineProps<{ selectedQuestion: Question; isEdit: boolean }>();
 
 function close() {
   emit("close"); // Emit the updated value to the parent
@@ -46,38 +47,109 @@ const schema = yup.object({
   email: yup.string().email("Invalid email").required("Required"),
   password: yup.string().min(8, "Must be at least 8 characters").required("Required"),
 });
+function handleFunctionParameters(parameters: Parameter[] | VoidType): Parameter[] | VoidType {
+  if (parameters === "VoidType") {
+    return "VoidType";
+  }
+
+  if (Array.isArray(parameters)) {
+    return parameters.map((param) => ({
+      name: param.name,
+      paramType:
+        param.paramType instanceof AbstractType
+          ? new AbstractType(param.paramType.type, param.paramType.tChildren)
+          : new AbstractType(AtomicType.Integer), // Default fallback
+    }));
+  }
+
+  // Fallback to an empty array if parameters is invalid
+  return [];
+}
 
 type Schema = yup.InferType<typeof schema>;
 
-const state = reactive(
-  new Question(
-    "Merge Sorted Arrays",
-    "Merge two sorted arrays into one sorted array.",
-    "Medium",
-    "Array",
-    [new InputOutput(["[1, 2]", "[3, 4]"], "[1, 2, 3, 4]")],
-    [new InputOutput(["[1, 2]", "[3, 4]"], "[1, 2, 3, 4]")],
-    new FunctionConfig(
-      "mergeArrays",
-      [
-        {
-          name: "arr1",
-          paramType: new AbstractType(CompositeType.Array, new AbstractType(AtomicType.Integer)),
-        },
-      ],
-      new AbstractType(CompositeType.Array, new AbstractType(AtomicType.Integer))
-    ),
-    ["Python", "Java", "Go"]
-  )
-);
+const state = reactive<Question>(
+  props.isEdit
+    ? new Question(
+        props.selectedQuestion.title,
+        props.selectedQuestion.description,
+        props.selectedQuestion.difficulty,
+        props.selectedQuestion.category,
+        props.selectedQuestion.examples.map(
+          (example) => new InputOutput(example.parameters, example.expectedOutput)
+        ),
+        // [],
+        props.selectedQuestion.testCases.map(
+          (testCase) => new InputOutput(testCase.parameters, testCase.expectedOutput)
+        ),
+        // [],
+        new FunctionConfig(
+          props.selectedQuestion.functionConfig.name,
+          props.selectedQuestion.functionConfig.parameters === "VoidType"
+            ? "VoidType"
+            : handleFunctionParameters(props.selectedQuestion.functionConfig.parameters),
+          // [],
 
+          props.selectedQuestion.functionConfig.returnType instanceof AbstractType
+            ? props.selectedQuestion.functionConfig.returnType
+            : "VoidType"
+        ),
+        props.selectedQuestion.languages
+        // []
+      )
+    : new Question()
+);
 
 const predefinedCategories = Object.values(PredefinedCategory);
 const predefinedLanguages = Object.values(PredefinedSupportedLanguage);
 
+const router = useRouter();
+
+async function updateQuestion(id: string, updatedQuestion: Question) {
+  const response = await fetch(`/questions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedQuestion),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update question");
+  }
+
+  return await response.json();
+}
+
+async function addQuestion(newQuestion: Question) {
+  const response = await fetch(`/questions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(newQuestion),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to add question");
+  }
+
+  return await response.json();
+}
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // Do something with event.data
   console.log(event.data);
+  try {
+    if (props.isEdit) {
+      await updateQuestion(props.selectedQuestion.id, state);
+    } else {
+      await addQuestion(state);
+    }
+    emit("close");
+  } catch (error) {
+    console.error("Failed to submit the form:", error);
+  }
 }
 // //TODO: repalce with more efficient way to update state like this:
 // const updateState = (key: string, value: any, index?: number, subKey?: string) => {
@@ -114,7 +186,7 @@ function updateState(newState: any) {
 </script>
 <template>
   <div>
-    <!-- <pre class="text-xs leading-none overflow-auto max-h-64">{{ JSON.stringify(state, null, 2) }}</pre> -->
+    <pre class="text-xs leading-none overflow-auto max-h-64">{{ JSON.stringify(state, null, 2) }}</pre>
     <UCard
       :ui="{
         base: 'h-full flex flex-col',
@@ -128,7 +200,7 @@ function updateState(newState: any) {
       <template #header>
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-            {{ selectedQuestion ? "Edit Question" : "New Question" }}
+            {{ props.selectedQuestion?.id ? "Edit Question" : "Add Question" }}
           </h3>
           <UButton
             color="gray"

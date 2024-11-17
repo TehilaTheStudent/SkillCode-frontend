@@ -123,8 +123,7 @@ export function textifyEnum<T>(enumObj: T, value: T[keyof T]): string {
 // Utility function to make text more human-readable
 function textify(value: string): string {
   // Replace camel case, underscores, and capitalize words
-  return value  
-    
+  return value;
 }
 
 /**
@@ -228,23 +227,23 @@ export class AbstractType {
   setVarType(index: number, newType: CompositeType | AtomicType): void {
     const typeList = this.toList();
     if (index < 0 || index >= typeList.length) {
-      console.log('Index out of bounds')
+      console.log("Index out of bounds");
       return; // Index out of bounds
     }
-  
+
     let current: AbstractType = this;
-  
+
     for (let i = 0; i < index; i++) {
       if (!current.tChildren) {
-        console.log('Invalid hierarchy, no further children')
-        return; // 
+        console.log("Invalid hierarchy, no further children");
+        return; //
       }
       current = current.tChildren;
     }
-  
+
     // Update the type
     current.type = newType;
-  
+
     // Handle edge cases
     if (index === typeList.length - 1 && Object.values(CompositeType).includes(newType as CompositeType)) {
       // If the last type is set to a composite, add an Integer child
@@ -256,7 +255,7 @@ export class AbstractType {
       current.tChildren = undefined;
     }
   }
-  
+
   /**
    * Get the type of AbstractType at the specified index in the list.
    */
@@ -418,44 +417,48 @@ export class Question {
   public title: string;
   public description: string;
   public difficulty: Difficulty;
-  public category: string | PredefinedCategory;
+  public category: PredefinedCategory;
   public stats: number = 0;
   public examples: InputOutput[];
   public testCases: InputOutput[];
   public functionConfig: FunctionConfig;
-  public languages: (string | SupportedLanguages)[];
+  public languages: SupportedLanguages[];
 
   constructor(
-    title: string,
-    description: string,
-    difficulty: Difficulty,
-    category: string | PredefinedCategory,
-    examples: InputOutput[],
-    testCases: InputOutput[],
-    functionConfig: FunctionConfig,
-    languages: (string | SupportedLanguages)[]
+    title?: string,
+    description?: string,
+    difficulty?: string,
+    category?: PredefinedCategory,
+    examples?: InputOutput[],
+    testCases?: InputOutput[],
+    functionConfig?: FunctionConfig,
+    languages?: PredefinedSupportedLanguage[]
   ) {
     this.id = (Question.idCounter++).toString();
-    this.title = title;
-    this.description = description;
-    this.difficulty = difficulty;
-    this.category = category;
+    this.title = title || "";
+    this.description = description || "";
+    this.difficulty = difficulty || "Easy";
+    this.category = category || PredefinedCategory.Array;
+    this.examples = examples || [];
+    this.testCases = testCases || [];
+    this.functionConfig = functionConfig || new FunctionConfig("", [], new AbstractType("VoidType"));
+    this.languages = languages || [];
 
     if (!examples || examples.length < 1) {
       // // throw new Error("At least one example is required.");
     }
-    this.examples = examples;
+    // this.examples = examples;
 
     if (!testCases || testCases.length < 1) {
       // // throw new Error("At least one test case is required.");
     }
-    this.testCases = testCases;
-    this.functionConfig = functionConfig;
+    // this.testCases = testCases;
+    // this.functionConfig = functionConfig;
 
     if (!languages || languages.length < 1) {
       // // throw new Error("At least one language is required.");
     }
-    this.languages = languages;
+    // this.languages = languages;
   }
 
   // get id(): string | undefined {

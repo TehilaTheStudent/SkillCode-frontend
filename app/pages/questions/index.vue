@@ -2,6 +2,8 @@
 import { row } from "@unovis/ts/components/timeline/style";
 import { InputOutput, Question } from "~/types/index.d";
 const config = useRuntimeConfig();
+const router = useRouter();
+const toast = useToast();
 const defaultColumns = [
   { key: "id", label: "ID" },
   { key: "title", label: "Title" },
@@ -24,6 +26,9 @@ const isOpenFormModal = ref(false);
 const descriptionContent = ref("");
 const descriptionTitle = ref("");
 const currentSelectedQuestion = ref<Question | null>(null);
+const formIsEdit = ref(false);
+const isDeleteModalOpen = ref(false);
+const questionToDelete = ref<Question | null>(null);
 
 function onViewDescription(row: Question) {
   descriptionTitle.value = row.title || "";
@@ -77,19 +82,37 @@ function onSelect(row: Question) {
 function onEdit(row: Question) {
   currentSelectedQuestion.value = row;
   isOpenFormModal.value = true;
-  onOpenQuestionForm(row);
+  onOpenQuestionForm(row, true);
+}
+
+async function onDeleteConfirm() {
+  if (questionToDelete.value) {
+    try {
+      await $fetch(`/api/questions/${questionToDelete.value.id}`, { method: "DELETE" });
+      questions.value = questions.value.filter((q) => q.id !== questionToDelete.value!.id);
+      toast.add({ icon: "i-heroicons-check-circle", title: "Question deleted successfully", color: "green" });
+    } catch (error) {
+      toast.add({ icon: "i-heroicons-exclamation-circle", title: "Failed to delete question", color: "red" });
+    } finally {
+      isDeleteModalOpen.value = false;
+    }
+  }
 }
 
 function onDelete(row: Question) {
-  console.log("Delete:", row);
+  questionToDelete.value = row;
+  isDeleteModalOpen.value = true;
 }
 
 function onRowClick(row: Question) {
-  window.open(`/code-editor/${row.id}`, "_blank");
+  //route to code-editor/:id
+  router.push(`/code-editor/${row.id}`);
 }
-function onOpenQuestionForm(row: Question | null = null) {
+function onOpenQuestionForm(row: Question | null = null, isEdit = false) {
   currentSelectedQuestion.value = row;
   isOpenFormModal.value = true;
+  // Pass isEdit to the form
+  formIsEdit.value = isEdit;
 }
 
 defineShortcuts({
@@ -154,9 +177,13 @@ defineShortcuts({
         <QuestionsDescription :selectedQuestion="currentSelectedQuestion" />
       </UDashboardModal>
       <UModal v-model="isOpenFormModal" fullscreen>
-        <QuestionsFormTabs @close="isOpenFormModal = false" :selectedQuestion="currentSelectedQuestion" />
+        <QuestionsFormTabs
+          @close="isOpenFormModal = false"
+          :selectedQuestion="currentSelectedQuestion"
+          :isEdit="formIsEdit"
+        />
       </UModal>
-
+      <SettingsDeleteQuestionModal v-model="isDeleteModalOpen" @confirm="onDeleteConfirm" />
       <UTable
         :rows="questions"
         v-model:sort="sort"
@@ -174,7 +201,9 @@ defineShortcuts({
 
         <!-- Title column -->
         <template #title-data="{ row }">
-          <span class="text-gray-900 dark:text-white font-medium truncate w-10">{{ truncateTitle(row.title) }}</span>
+          <span class="text-gray-900 dark:text-white font-medium truncate w-10">{{
+            truncateTitle(row.title)
+          }}</span>
         </template>
 
         <!-- Description column -->
