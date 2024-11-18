@@ -32,10 +32,7 @@ const config = useRuntimeConfig();
 const apiUrl = `${config.public.backendUrl}/questions`;
 
 const questions = ref<Question[]>([]); // Replace useFetch with a ref
-  const pending = ref(false); // Replace useFetch pending state
-
-
-
+const pending = ref(false); // Replace useFetch pending state
 
 async function refreshQuestions() {
   pending.value = true; // Start loading

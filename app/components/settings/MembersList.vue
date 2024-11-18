@@ -13,12 +13,12 @@ function getItems(member: Member) {
     [
       {
         label: "Edit member",
-        click: () => // console.log("Edit", member),
+        click: () => console.log("Edit", member),
       },
       {
         label: "Remove member",
         labelClass: "text-red-500 dark:text-red-400",
-        click: () => // console.log("Remove", member),
+        click: () => console.log("Remove", member),
       },
     ],
   ];
@@ -26,7 +26,7 @@ function getItems(member: Member) {
 
 function onRoleChange(member: Member, role: string) {
   // Do something with data
-  // console.log(member.username, role);
+  console.log(member.username, role);
 }
 </script>
 

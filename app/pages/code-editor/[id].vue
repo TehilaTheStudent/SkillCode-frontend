@@ -2,29 +2,41 @@
 import { EditorView, basicSetup } from "codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
-import { Question } from "~/types/index.d";
+import { PredefinedSupportedLanguage, Question } from "~/types/index.d";
 
 const code = ref("// Write your solution here");
 const editorContainer = ref<HTMLDivElement | null>(null);
 const route = useRoute();
-const questionId = route.params.id;
-const language = ref("javascript"); // Default language
+const questionId: string = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+const language = ref<PredefinedSupportedLanguage>(PredefinedSupportedLanguage.JavaScript); // Default language
 const showModal = ref(false); // Add showModal ref
 const config = useRuntimeConfig();
 const apiUrl = `${config.public.backendUrl}/questions`;
 // Fetch the question details
-const { data: question } = await useFetch<Question>(`${apiUrl}/${questionId}`, {
+
+const {
+  data: question,
+  error,
+  pending,
+} = await useFetch<Question>(`${apiUrl}/${questionId}`, {
   default: () => null,
 });
+
+if (error.value) {
+  console.error("Failed to fetch question:", error.value);
+}
 
 onMounted(() => {
   let editor: EditorView | null = null;
 
   watchEffect(() => {
     if (editorContainer.value) {
-      const langExtension = language.value === "javascript" ? javascript() : python();
+      if (editor) editor.destroy(); // Cleanup the previous editor
+
+      const langExtension =
+        language.value === PredefinedSupportedLanguage.JavaScript ? javascript() : python();
       editor = new EditorView({
-        doc: question.value.title || code.value,
+        doc: code.value,
         extensions: [basicSetup, langExtension],
         parent: editorContainer.value,
       });
@@ -34,6 +46,8 @@ onMounted(() => {
 
 // Submit code to the backend
 const submitSolution = async () => {
+  console.log("Submitting solution...");
+  console.log("Code:", code.value);
   const response = await fetch(`${apiUrl}/${questionId}/test`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -99,16 +113,23 @@ const submitSolution = async () => {
           <h2 class="text-lg font-semibold text-gray-700">Examples</h2>
           <ul class="list-disc list-inside">
             <li v-for="(example, index) in question?.examples || []" :key="index">
-              <pre class="text-sm bg-gray-200 p-2 rounded">{{ JSON.stringify(example, null, 2) }}</pre>
+              <p><strong>Input:</strong> {{ example.parameters }}</p>
+              <p><strong>Expected Output:</strong> {{ example.expected_output }}</p>
             </li>
           </ul>
         </div>
       </div>
     </div>
-    <!-- <ClientOnly> -->
+    <h1 v-if="pending">Loading...</h1>
+    <div v-else-if="error">Error loading question. Please try again later.</div>
+    <div v-else>
+      <h1>{{ question.title }}</h1>
+      <p>{{ question.description }}</p>
+    </div>
     <QuestionsCodeEditor
       :modelValue="code"
-      :supportedLanguages="question.languages"
+      :supportedLanguages="question?.languages"
+      :questionId="questionId"
       @update:modelValue="code = $event"
     />
     <!-- </ClientOnly> -->

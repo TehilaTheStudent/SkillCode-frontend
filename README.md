@@ -4,8 +4,12 @@
 2. **Dashboard Customization**: Adjust components like the table, modals, and action buttons to display and interact with the static questions.
 3. **Creating Typing System**: For ease of users in creating new questions
 
-![Alt text](./public/image.png)
+### TODOS:
 
+
+- connect to backend
+- add error handling
+- dont refresh the code editor page!
 
 
 
