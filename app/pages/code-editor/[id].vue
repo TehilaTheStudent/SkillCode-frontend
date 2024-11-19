@@ -8,27 +8,25 @@ const code = ref("// Write your solution here");
 const editorContainer = ref<HTMLDivElement | null>(null);
 const route = useRoute();
 const questionId: string = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
-const language = ref<PredefinedSupportedLanguage>(PredefinedSupportedLanguage.JavaScript); // Default language
-const showModal = ref(false); // Add showModal ref
+const language = ref<PredefinedSupportedLanguage>(PredefinedSupportedLanguage.Python); // Default language
+const showDescriptionModal = ref(false); // Add showModal ref
+const isSubmitting = ref(false); // Add isSubmitting ref
+const submissionStatus = ref<"idle" | "success" | "error">("idle"); // Add submissionStatus ref
 const config = useRuntimeConfig();
 const apiUrl = `${config.public.backendUrl}/questions`;
 // Fetch the question details
-
-const {
-  data: question,
-  error,
-  pending,
-} = await useFetch<Question>(`${apiUrl}/${questionId}`, {
-  default: () => null,
-});
-
-if (error.value) {
-  console.error("Failed to fetch question:", error.value);
-}
-
-onMounted(() => {
+const question = ref<Question>(new Question());
+// Ref to track loading state
+const isLoading = ref(true);
+onMounted(async () => {
+  const data: Question = await $fetch<Question>(`${apiUrl}/${questionId}`, {
+    onResponseError({ response }) {
+      console.error("Failed to fetch question:", response);
+    },
+  });
+  question.value = data;
   let editor: EditorView | null = null;
-
+  isLoading.value = false;
   watchEffect(() => {
     if (editorContainer.value) {
       if (editor) editor.destroy(); // Cleanup the previous editor
@@ -46,8 +44,9 @@ onMounted(() => {
 
 // Submit code to the backend
 const submitSolution = async () => {
+  isSubmitting.value = true;
+  submissionStatus.value = "idle";
   console.log("Submitting solution...");
-  console.log("Code:", code.value);
   const response = await fetch(`${apiUrl}/${questionId}/test`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -57,91 +56,75 @@ const submitSolution = async () => {
     }),
   });
 
+  isSubmitting.value = false;
   if (response.ok) {
     const result = await response.json();
+    submissionStatus.value = "success";
     alert("Solution submitted successfully: " + JSON.stringify(result));
   } else {
+    submissionStatus.value = "error";
     alert("Failed to submit the solution");
   }
 };
+
+const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
+  language.value = newLanguage;
+};
 </script>
-
-<style scoped>
-.modal-content {
-  max-height: 80vh;
-  overflow-y: auto;
-}
-</style>
-
 <template>
-  <div></div>
   <div class="w-full p-4 space-y-6">
     <!-- Title -->
-    <h1 class="text-2xl font-bold text-gray-800">{{ question?.title || "Loading..." }}</h1>
+    <h1 class="text-2xl font-bold text-gray-800">{{ question?.title || "Loading Question..." }}</h1>
 
     <!-- Modal Trigger Button -->
+    <USkeleton v-if="isLoading" class="h-10 w-[250px]"> </USkeleton>
     <UButton
-      @click="showModal = true"
+      v-else
+      @click="showDescriptionModal = true"
       variant="outline"
-      icon="i-mdi:head-lightbulb"
-      class="flex items-center space-x-2 text-blue-500 hover:underline"
-    >
-      <span>Description & Examples</span>
-    </UButton>
+      label="View Description & Examples"
+      icon="i-heroicons-eye"
+      class="flex items-center space-x-2 text-blue-500"
+    />
 
     <!-- Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white p-6 rounded shadow-lg w-3/4 max-w-2xl modal-content">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Description & Examples</h2>
-          <button @click="showModal = false" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fill-rule="evenodd"
-                d="M10 9.293l4.646-4.647a.5.5 0 01.708.708L10.707 10l4.647 4.646a.5.5 0 01-.708.708L10 10.707l-4.646 4.647a.5.5 0 01-.708-.708L9.293 10 4.646 5.354a.5.5 0 01.708-.708L10 9.293z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
-        <!-- Description -->
-        <div class="text-gray-600 mb-4">
-          <p>{{ question?.description || "Loading question description..." }}</p>
-        </div>
-        <!-- Examples -->
-        <div class="bg-gray-100 p-4 rounded shadow-sm">
-          <h2 class="text-lg font-semibold text-gray-700">Examples</h2>
-          <ul class="list-disc list-inside">
-            <li v-for="(example, index) in question?.examples || []" :key="index">
-              <p><strong>Input:</strong> {{ example.parameters }}</p>
-              <p><strong>Expected Output:</strong> {{ example.expected_output }}</p>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <h1 v-if="pending">Loading...</h1>
-    <div v-else-if="error">Error loading question. Please try again later.</div>
-    <div v-else>
-      <h1>{{ question.title }}</h1>
-      <p>{{ question.description }}</p>
-    </div>
+    <UDashboardModal
+      title="Description & Examples"
+      :ui="{ width: 'sm:max-w-2xl' }"
+      v-model="showDescriptionModal"
+    >
+      <QuestionsDescriptionExamples :selectedQuestion="question"></QuestionsDescriptionExamples>
+    </UDashboardModal>
+
+    <USkeleton v-if="isLoading" class="h-[400px] w-full"> </USkeleton>
     <QuestionsCodeEditor
+      v-else
       :modelValue="code"
-      :supportedLanguages="question?.languages"
+      :supportedLanguages="question?.languages || []"
       :questionId="questionId"
       @update:modelValue="code = $event"
+      @update:language="updateLanguage"
     />
     <!-- </ClientOnly> -->
 
     <!-- Submit Button -->
     <div class="text-right">
-      <button
+      <UButton
         @click="submitSolution"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring"
+        :loading="isSubmitting"
+        :disabled="isSubmitting || question.title == ''"
+        variant="solid"
+        color="blue"
+        class="px-4 py-2"
+        icon="i-codicon:run-all"
       >
-        Submit Solution
-      </button>
+        <span v-if="isSubmitting">Submitting...</span>
+        <span v-else>Submit Solution</span>
+      </UButton>
+      <div v-if="submissionStatus === 'success'" class="text-green-500 mt-2">
+        Solution submitted successfully!
+      </div>
+      <div v-if="submissionStatus === 'error'" class="text-red-500 mt-2">Failed to submit the solution.</div>
     </div>
   </div>
 </template>

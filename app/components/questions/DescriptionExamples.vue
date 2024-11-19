@@ -10,7 +10,6 @@ const props = defineProps({
 </script>
 
 <template>
-  <p>{{ selectedQuestion.title }}</p>
   <p>{{ selectedQuestion.description }}</p>
   <n-list v-if="selectedQuestion.examples.length">
     <n-list-item v-for="(example, index) in selectedQuestion.examples" :key="index">

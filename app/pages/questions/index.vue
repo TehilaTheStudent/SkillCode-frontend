@@ -6,7 +6,7 @@ const toast = useToast();
 const defaultColumns = [
   // { key: "id", label: "ID" }, // Remove ID column
   { key: "title", label: "Title" },
-  { key: "description", label: "Description" }, // New column for description
+  { key: "details", label: "Details" }, // New column for description
   { key: "category", label: "Category", sortable: true },
   { key: "stats", label: "Stats", sortable: true },
   { key: "difficulty", label: "Difficulty", sortable: true },
@@ -74,6 +74,9 @@ const query = computed(() => ({
   sort: sort.value.column,
   order: sort.value.direction,
 }));
+watch(query, () => {
+  refreshQuestions();
+});
 
 // const { data: questions, pending } = await useFetch<Question[]>(apiUrl, {
 //   query, // Pass query parameters if needed
@@ -199,10 +202,9 @@ defineShortcuts({
       <UDashboardModal
         v-model="isDescriptionModalOpen"
         title="Description & Examples"
-        description="See description and examples of the question"
-        :ui="{ width: 'sm:max-w-md' }"
+        :ui="{ width: 'sm:max-w-2xl' }"
       >
-        <QuestionsDescription :selectedQuestion="currentSelectedQuestion" />
+        <QuestionsDescriptionExamples :selectedQuestion="currentSelectedQuestion" />
       </UDashboardModal>
       <UModal v-model="isOpenFormModal" fullscreen>
         <QuestionsFormTabs
@@ -229,8 +231,8 @@ defineShortcuts({
           }}</span>
         </template>
 
-        <!-- Description column -->
-        <template #description-data="{ row }">
+        <!-- Details column -->
+        <template #details-data="{ row }">
           <div class="flex justify-center truncate w-10">
             <UTooltip text="View Description & Examples">
               <UButton icon="i-heroicons-eye" size="md" variant="ghost" @click="onViewDescription(row)" />
@@ -271,16 +273,14 @@ defineShortcuts({
               </UButton>
             </UTooltip>
             <UTooltip text="Edit">
-              <UButton icon="i-heroicons-pencil" size="xs" variant="ghost" @click="onEdit(row)" />
+              <UButton size="xs" variant="ghost" @click="onEdit(row)" icon="i-heroicons-pencil">
+                Edit
+              </UButton>
             </UTooltip>
             <UTooltip text="Delete">
-              <UButton
-                icon="i-heroicons-trash"
-                size="xs"
-                variant="ghost"
-                color="red"
-                @click="onDelete(row)"
-              />
+              <UButton size="xs" variant="ghost" color="red" @click="onDelete(row)" icon="i-heroicons-trash">
+                Delete
+              </UButton>
             </UTooltip>
           </div>
         </template>

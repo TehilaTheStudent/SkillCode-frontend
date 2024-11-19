@@ -12,13 +12,13 @@ import { PredefinedSupportedLanguage } from "~/types/index.d";
 const props = defineProps<{
   questionId: string; // The question ID to fetch the function signature
   modelValue: string; // Initial content for the editor
-  supportedLanguages: (string | PredefinedSupportedLanguage)[]; // Supported languages
+  supportedLanguages: PredefinedSupportedLanguage[]; // Supported languages
 }>();
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "update:language"]);
 
 // Ref to hold the currently selected language
 const currentLanguage = ref(
-  props.supportedLanguages[0] || "javascript" // Default to JavaScript
+  props.supportedLanguages[0] || PredefinedSupportedLanguage.Python // Default to Python
 );
 
 // Ref for the editor container
@@ -34,19 +34,24 @@ const apiUrl = `${config.public.backendUrl}/questions`;
 // Fetch the function signature from the backend
 async function fetchFunctionSignature() {
   try {
-    const response = await fetch(`${apiUrl}/${props.questionId}/signature?language=${currentLanguage.value}`);
-
+    const response = await fetch(
+      `${apiUrl}/${props.questionId}/signature?language=${(
+        currentLanguage.value || PredefinedSupportedLanguage.Python
+      ).toLowerCase()}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch function signature");
     }
     const data = await response.json();
-    functionSignature.value = data.function_signature;
-    console.log("Fetched function signature:", functionSignature.value);
+    functionSignature.value = data.function_signature + "\n".repeat(16);
+    emit("update:modelValue", data.function_signature);
   } catch (error) {
     console.error("Error fetching function signature:", error);
     functionSignature.value = "// Unable to fetch function signature.";
   }
 }
+
+
 
 // Initialize CodeMirror editor on mount
 onMounted(async () => {
@@ -56,13 +61,13 @@ onMounted(async () => {
 
   if (editorContainer.value) {
     // Initialize the editor with the fetched function signature or blank lines
-    const initialContent = (functionSignature.value || props.modelValue)+ "\n".repeat(16);
+    const initialContent = functionSignature.value || props.modelValue;
 
     editor = new EditorView({
       doc: initialContent,
       extensions: [
         basicSetup, // Basic features (line numbers, bracket matching, etc.)
-        currentLanguage.value === "javascript" ? javascript() : python(),
+        currentLanguage.value === PredefinedSupportedLanguage.JavaScript ? javascript() : python(),
         EditorView.updateListener.of((viewUpdate) => {
           if (viewUpdate.docChanged) {
             // Emit the new value when the document changes
@@ -74,6 +79,8 @@ onMounted(async () => {
       parent: editorContainer.value,
     });
   }
+
+  console.log("Editor initialized");
 });
 
 // Watch for changes in the selected language
@@ -81,11 +88,14 @@ watch(currentLanguage, async (newLang) => {
   if (editor) {
     // Fetch the function signature for the new language
     await fetchFunctionSignature();
-
+    emit("update:language", newLang);
     // Update the editor's content with the new function signature
     editor.dispatch({
       changes: { from: 0, to: editor.state.doc.length, insert: functionSignature.value },
-      effects: StateEffect.reconfigure.of([basicSetup, newLang === "javascript" ? javascript() : python()]),
+      effects: StateEffect.reconfigure.of([
+        basicSetup,
+        newLang === PredefinedSupportedLanguage.JavaScript ? javascript() : python(),
+      ]),
     });
   }
 });
@@ -101,9 +111,44 @@ watch(
     }
   }
 );
-function openUtilsWindow() {
-  window.open("/code-editor/utils", "_blank", "width=1200,height=800,scrollbars=yes");
+async function openUtilsWindow() {
+  try {
+    // Fetch the utils content from the backend
+    const response = await fetch(`${config.public.backendUrl}/utils?language=${currentLanguage.value.toLowerCase()}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch utils file");
+    }
+
+    // Get the utils file content as text
+    const utilsContent = await response.text();
+    // Fetch the template HTML file
+    const templateResponse = await fetch("/static/utils-template.html");
+    if (!templateResponse.ok) {
+      throw new Error("Failed to load the template");
+    }
+
+    // Get the template HTML as a string
+    let templateHtml = await templateResponse.text();
+
+    // Replace placeholders with dynamic values
+    templateHtml = templateHtml.replace(/{{LANGUAGE}}/g, currentLanguage.value.toLowerCase());
+    templateHtml = templateHtml.replace('<pre id="utils-content"></pre>', `<pre id="utils-content" class="language-${currentLanguage.value.toLowerCase()}"><code>${utilsContent}</code></pre>`);
+    // Open a new window and write the dynamically generated HTML
+    const newWindow = window.open("", "_blank", "width=1200,height=800,scrollbars=yes");
+    if (newWindow) {
+      newWindow.document.open();
+      newWindow.document.write(templateHtml);
+      newWindow.document.close();
+    } else {
+      console.error("Failed to open a new window");
+    }
+  } catch (error) {
+    console.error("Error opening utils window:", error);
+    alert("Failed to load utils content. Please try again later.");
+  }
 }
+
+
 // Cleanup editor on component unmount
 onUnmounted(() => {
   if (editor) {
@@ -129,13 +174,12 @@ onUnmounted(() => {
           </option>
         </select>
         <UButton @click="openUtilsWindow" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          Show Utils
+          Show Data Strucutes & Utils
         </UButton>
       </div>
 
       <!-- Code Editor -->
       <div>
-        <h2 class="text-lg font-semibold text-gray-700 mb-2">Code Editor</h2>
         <div ref="editorContainer" class="h-80 border rounded overflow-scroll bg-gray-50"></div>
       </div>
     </div>
