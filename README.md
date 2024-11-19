@@ -1,15 +1,9 @@
 # **SkillCode Frontend**
 
-1. **Static Data Setup**: Use a local `questions.ts` file with a sample dataset to simulate backend data for simplicity.
-2. **Dashboard Customization**: Adjust components like the table, modals, and action buttons to display and interact with the static questions.
-3. **Creating Typing System**: For ease of users in creating new questions
-
-### TODOS:
+# go to [skillcode-backend](https://github.com/TehilaTheStudent/SkillCode-backend) for official README
 
 
-- connect to backend
-- add error handling
-- dont refresh the code editor page!
+### but you can see here the design of my Typing System
 
-
+![image](public/image.png)
 
