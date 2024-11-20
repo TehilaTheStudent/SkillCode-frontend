@@ -24,17 +24,17 @@ const links = [
       shortcuts: ["G", "Q"],
     },
   },
-  // {
-  //   id: "inbox",
-  //   label: "Inbox",
-  //   icon: "i-heroicons-inbox",
-  //   to: "/inbox",
-  //   badge: "4",
-  //   tooltip: {
-  //     text: "Inbox",
-  //     shortcuts: ["G", "I"],
-  //   },
-  // },
+  {
+    id: "inbox",
+    label: "Inbox",
+    icon: "i-heroicons-inbox",
+    to: "/inbox",
+    badge: "4",
+    tooltip: {
+      text: "Inbox",
+      shortcuts: ["G", "I"],
+    },
+  },
   {
     id: "settings",
     label: "Settings",

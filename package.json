@@ -29,6 +29,7 @@
     "naive-ui": "^2.40.1",
     "nuxt": "^3.14.159",
     "v-calendar": "^3.1.2",
+    "vuex": "^4.0.2",
     "yup": "^1.4.0"
   },
   "devDependencies": {

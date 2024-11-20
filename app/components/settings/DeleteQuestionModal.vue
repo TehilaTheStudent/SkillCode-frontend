@@ -15,7 +15,7 @@ function onDelete() {
     loading.value = false
     model.value = false
     emit("confirm");
-  }, 2000)
+  }, 1)
 }
 </script>
 

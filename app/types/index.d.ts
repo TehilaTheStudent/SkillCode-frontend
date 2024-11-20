@@ -441,7 +441,30 @@ export class InputOutput {
   // }
 }
 
-export type Difficulty = "Easy" | "Medium" | "Hard";
+
+
+
+export interface Feedback {
+  status: "success" | "fail"; // Overall status: success or fail
+  results: Result[]; // Array of individual test case results
+  error?: "compilation" | "fail tests" | "schema validation" | null; // Error type, if any
+  details?: string | null; // Detailed description of the error, if applicable
+}
+
+export interface Result {
+  status: "pass" | "fail"; // Status of the test case: pass or fail
+  parameters: string[]; // Array of strings representing input parameters
+  expected_output: string; // Expected output of the test case
+  actual_output: string; // Actual output of the test case
+}
+
+
+
+export enum Difficulty {
+  Easy = "Easy",
+  Medium = "Medium",
+  Hard = "Hard",
+}
 
 /**
  * @entity class

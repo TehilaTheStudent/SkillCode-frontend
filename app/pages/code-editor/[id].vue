@@ -2,7 +2,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
-import { PredefinedSupportedLanguage, Question } from "~/types/index.d";
+import { PredefinedSupportedLanguage, Question, type Feedback } from "~/types/index.d";
 
 const code = ref("// Write your solution here");
 const editorContainer = ref<HTMLDivElement | null>(null);
@@ -16,6 +16,11 @@ const config = useRuntimeConfig();
 const apiUrl = `${config.public.backendUrl}/questions`;
 // Fetch the question details
 const question = ref<Question>(new Question());
+const isFeedbackModalOpen = ref(false);
+const feedback = ref<Feedback | null>(null); // Update feedback ref to allow null
+
+const toast = useToast();
+
 // Ref to track loading state
 const isLoading = ref(true);
 onMounted(async () => {
@@ -46,27 +51,37 @@ onMounted(async () => {
 const submitSolution = async () => {
   isSubmitting.value = true;
   submissionStatus.value = "idle";
-  console.log("Submitting solution...");
-  const response = await fetch(`${apiUrl}/${questionId}/test`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      code: code.value,
-      language: language.value,
-    }),
-  });
+  try {
+    const response = await fetch(`${apiUrl}/${questionId}/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: code.value,
+        language: language.value,
+      }),
+    });
 
-  isSubmitting.value = false;
-  if (response.ok) {
+    isSubmitting.value = false;
     const result = await response.json();
     submissionStatus.value = "success";
-    alert("Solution submitted successfully: " + JSON.stringify(result));
-  } else {
+    feedback.value = result; // Set feedback value
+    isFeedbackModalOpen.value = true; // Open feedback modal
+    console.log("Feedback received:", result);
+    toast.add({ title: "Question submitted successfully!", icon: "ep:success-filled", color: "green" });
+  } catch (error) {
+    isSubmitting.value = false;
     submissionStatus.value = "error";
-    alert("Failed to submit the solution");
+    console.error("Error submitting solution:", error);
+    toast.add({
+      title: "An error occurred while submitting the solution.",
+      icon: "i-material-symbols:chat-error-rounded",
+      color: "red",
+    });
   }
 };
-
+const updateCode = function (newCode: string) {
+  code.value = newCode;
+};
 const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
   language.value = newLanguage;
 };
@@ -75,7 +90,6 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
   <div class="w-full p-4 space-y-6">
     <!-- Title -->
     <h1 class="text-2xl font-bold text-gray-800">{{ question?.title || "Loading Question..." }}</h1>
-
     <!-- Modal Trigger Button -->
     <USkeleton v-if="isLoading" class="h-10 w-[250px]"> </USkeleton>
     <UButton
@@ -86,7 +100,23 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
       icon="i-heroicons-eye"
       class="flex items-center space-x-2 text-blue-500"
     />
-
+    <UModal v-model="isFeedbackModalOpen" prevent-close>
+      <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Feedback</h3>
+            <UButton
+              color="gray"
+              variant="ghost"
+              icon="i-heroicons-x-mark-20-solid"
+              class="-my-1"
+              @click="isFeedbackModalOpen = false"
+            />
+          </div>
+        </template>
+        <QuestionsFeedback :feedback="feedback"></QuestionsFeedback>
+      </UCard>
+    </UModal>
     <!-- Modal -->
     <UDashboardModal
       title="Description & Examples"
@@ -102,7 +132,7 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
       :modelValue="code"
       :supportedLanguages="question?.languages || []"
       :questionId="questionId"
-      @update:modelValue="code = $event"
+      @update:modelValue="updateCode"
       @update:language="updateLanguage"
     />
     <!-- </ClientOnly> -->
@@ -122,9 +152,11 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
         <span v-else>Submit Solution</span>
       </UButton>
       <div v-if="submissionStatus === 'success'" class="text-green-500 mt-2">
-        Solution submitted successfully!
+        <!-- Removed success message -->
       </div>
-      <div v-if="submissionStatus === 'error'" class="text-red-500 mt-2">Failed to submit the solution.</div>
+      <div v-if="submissionStatus === 'error'" class="text-red-500 mt-2">
+        <!-- Removed error message -->
+      </div>
     </div>
   </div>
 </template>

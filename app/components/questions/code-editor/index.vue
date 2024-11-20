@@ -51,8 +51,6 @@ async function fetchFunctionSignature() {
   }
 }
 
-
-
 // Initialize CodeMirror editor on mount
 onMounted(async () => {
   await fetchFunctionSignature(); // Fetch the function signature
@@ -89,14 +87,26 @@ watch(currentLanguage, async (newLang) => {
     // Fetch the function signature for the new language
     await fetchFunctionSignature();
     emit("update:language", newLang);
+
     // Update the editor's content with the new function signature
+    const newContent = functionSignature.value || ""; // Ensure fallback to empty string
     editor.dispatch({
-      changes: { from: 0, to: editor.state.doc.length, insert: functionSignature.value },
+      changes: { from: 0, to: editor.state.doc.length, insert: newContent },
       effects: StateEffect.reconfigure.of([
         basicSetup,
         newLang === PredefinedSupportedLanguage.JavaScript ? javascript() : python(),
+        // Rebind the update listener to track changes
+        EditorView.updateListener.of((viewUpdate) => {
+          if (viewUpdate.docChanged) {
+            const updatedValue = viewUpdate.state.doc.toString();
+            emit("update:modelValue", updatedValue);
+          }
+        }),
       ]),
     });
+
+    // Emit the new content to keep the parent in sync
+    emit("update:modelValue", newContent);
   }
 });
 
@@ -111,10 +121,13 @@ watch(
     }
   }
 );
+
 async function openUtilsWindow() {
   try {
     // Fetch the utils content from the backend
-    const response = await fetch(`${config.public.backendUrl}/utils?language=${currentLanguage.value.toLowerCase()}`);
+    const response = await fetch(
+      `${config.public.backendUrl}/utils?language=${currentLanguage.value.toLowerCase()}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch utils file");
     }
@@ -132,7 +145,10 @@ async function openUtilsWindow() {
 
     // Replace placeholders with dynamic values
     templateHtml = templateHtml.replace(/{{LANGUAGE}}/g, currentLanguage.value.toLowerCase());
-    templateHtml = templateHtml.replace('<pre id="utils-content"></pre>', `<pre id="utils-content" class="language-${currentLanguage.value.toLowerCase()}"><code>${utilsContent}</code></pre>`);
+    templateHtml = templateHtml.replace(
+      '<pre id="utils-content"></pre>',
+      `<pre id="utils-content" class="language-${currentLanguage.value.toLowerCase()}"><code>${utilsContent}</code></pre>`
+    );
     // Open a new window and write the dynamically generated HTML
     const newWindow = window.open("", "_blank", "width=1200,height=800,scrollbars=yes");
     if (newWindow) {
@@ -147,7 +163,6 @@ async function openUtilsWindow() {
     alert("Failed to load utils content. Please try again later.");
   }
 }
-
 
 // Cleanup editor on component unmount
 onUnmounted(() => {

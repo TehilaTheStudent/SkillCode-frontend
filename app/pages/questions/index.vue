@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { row } from "@unovis/ts/components/timeline/style";
-import { InputOutput, Question } from "~/types/index.d";
+import { InputOutput, Question, PredefinedCategory, Difficulty } from "~/types/index.d";
 const router = useRouter();
 const toast = useToast();
 const defaultColumns = [
@@ -82,19 +82,8 @@ watch(query, () => {
 //   query, // Pass query parameters if needed
 //   default: () => [],
 // });
-const defaultCategories = questions.value.reduce((acc, question) => {
-  if (!acc.includes(question.category)) {
-    acc.push(question.category);
-  }
-  return acc;
-}, [] as string[]);
-
-const defaultDifficulties = questions.value.reduce((acc, question) => {
-  if (!acc.includes(question.difficulty)) {
-    acc.push(question.difficulty);
-  }
-  return acc;
-}, [] as string[]);
+const defaultCategories = Object.values(PredefinedCategory);
+const defaultDifficulties = Object.values(Difficulty);
 
 function onSelect(row: Question) {
   const index = selected.value.findIndex((item) => item.id === row.id);
