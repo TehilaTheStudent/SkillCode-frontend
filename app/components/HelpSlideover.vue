@@ -21,7 +21,7 @@ const links = [{
 }, {
   label: 'GitHub repository',
   icon: 'i-simple-icons-github',
-  to: 'https://github.com/nuxt-ui-pro/dashboard',
+  to: 'https://github.com/TehilaTheStudent/SkillCode-frontend',
   target: '_blank'
 }, {
   label: 'Buy Nuxt UI Pro',

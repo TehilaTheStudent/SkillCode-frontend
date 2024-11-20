@@ -31,23 +31,10 @@ const questionToDelete = ref<Question | null>(null);
 const config = useRuntimeConfig();
 const apiUrl = `${config.public.backendUrl}/questions`;
 
-const questions = ref<Question[]>([]); // Replace useFetch with a ref
-const pending = ref(false); // Replace useFetch pending state
+const questions = ref<Question[]>([]);
+const pending = ref(false);
 
-async function refreshQuestions() {
-  pending.value = true; // Start loading
-  try {
-    const response = await $fetch<Question[]>(apiUrl, {
-      query: query.value, // Pass computed query parameters
-    });
-    questions.value = response; // Update questions with fetched data
-  } catch (error) {
-    console.error("Error fetching questions:", error);
-    questions.value = []; // Reset questions on error
-  } finally {
-    pending.value = false; // End loading
-  }
-}
+
 
 // Trigger data fetching when the component is mounted
 onMounted(() => {
@@ -68,31 +55,34 @@ const truncateTitle = (title: string) => {
 const columns = computed(() => defaultColumns.filter((column) => selectedColumns.value.includes(column)));
 
 const query = computed(() => ({
-  q: q.value,
-  categories: selectedCategories.value.join(","),
-  difficulties: selectedDifficulties.value.join(","),
-  sort: sort.value.column,
-  order: sort.value.direction,
+  search: q.value || undefined,
+  categories: selectedCategories.value.length ? selectedCategories.value.join(",") : undefined,
+  difficulties: selectedDifficulties.value.length ? selectedDifficulties.value.join(",") : undefined,
+  sort_by: sort.value.column || undefined,
+  order: sort.value.direction || undefined,
 }));
+
+async function refreshQuestions() {
+  pending.value = true;
+  try {
+    const response = await $fetch<Question[]>(apiUrl, {
+      query: query.value,
+    });
+    questions.value = response;
+  } catch (error) {
+    console.error("Error fetching questions:", error);
+    questions.value = [];
+  } finally {
+    pending.value = false;
+  }
+}
+
 watch(query, () => {
   refreshQuestions();
 });
 
-// const { data: questions, pending } = await useFetch<Question[]>(apiUrl, {
-//   query, // Pass query parameters if needed
-//   default: () => [],
-// });
 const defaultCategories = Object.values(PredefinedCategory);
 const defaultDifficulties = Object.values(Difficulty);
-
-function onSelect(row: Question) {
-  const index = selected.value.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    selected.value.push(row);
-  } else {
-    selected.value.splice(index, 1);
-  }
-}
 
 function onEdit(row: Question) {
   currentSelectedQuestion.value = row;
@@ -202,7 +192,7 @@ defineShortcuts({
           :isEdit="formIsEdit"
         />
       </UModal>
-      <SettingsDeleteQuestionModal v-model="isDeleteModalOpen" @confirm="onDeleteConfirm" />
+      <QuestionsDeleteQuestionModal v-model="isDeleteModalOpen" @confirm="onDeleteConfirm" />
       <UTable
         :rows="questions"
         v-model:sort="sort"

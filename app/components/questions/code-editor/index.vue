@@ -126,7 +126,7 @@ async function openUtilsWindow() {
   try {
     // Fetch the utils content from the backend
     const response = await fetch(
-      `${config.public.backendUrl}/utils?language=${currentLanguage.value.toLowerCase()}`
+      `${config.public.backendUrl}/ds_utils?language=${currentLanguage.value.toLowerCase()}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch utils file");
@@ -192,11 +192,8 @@ onUnmounted(() => {
           Show Data Strucutes & Utils
         </UButton>
       </div>
-
-      <!-- Code Editor -->
-      <div>
-        <div ref="editorContainer" class="h-80 border rounded overflow-scroll bg-gray-50"></div>
-      </div>
+      <!-- Code Editor  -->
+      <div ref="editorContainer" class="h-80 border rounded overflow-scroll bg-gray-50"></div>
     </div>
   </div>
 </template>

@@ -66,7 +66,6 @@ const submitSolution = async () => {
     submissionStatus.value = "success";
     feedback.value = result; // Set feedback value
     isFeedbackModalOpen.value = true; // Open feedback modal
-    console.log("Feedback received:", result);
     toast.add({ title: "Question submitted successfully!", icon: "ep:success-filled", color: "green" });
   } catch (error) {
     isSubmitting.value = false;
@@ -151,12 +150,6 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
         <span v-if="isSubmitting">Submitting...</span>
         <span v-else>Submit Solution</span>
       </UButton>
-      <div v-if="submissionStatus === 'success'" class="text-green-500 mt-2">
-        <!-- Removed success message -->
-      </div>
-      <div v-if="submissionStatus === 'error'" class="text-red-500 mt-2">
-        <!-- Removed error message -->
-      </div>
     </div>
   </div>
 </template>
