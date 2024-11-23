@@ -93,8 +93,8 @@ const stages = computed(() => {
     </div>
 
     <!-- Results -->
-    <div v-if="feedback.results.length > 0" class="space-y-4">
-      <h3 class="text-xl font-semibold text-gray-700">Failed Tests {{ failedTestsCount }}/{{ feedback.results.length }}</h3>
+    <div v-if="failedTestsCount > 0" class="space-y-4">
+      <h3    class="text-xl font-semibold text-gray-700">Failed Tests {{ failedTestsCount }}/{{ feedback.results.length }}</h3>
       <div class="space-y-2">
         <QuestionsTestCaseFeedback
           v-for="(result, index) in feedback.results.filter((result) => result.status === 'fail')"

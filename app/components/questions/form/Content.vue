@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+//
 import type { InputOutput } from "~/types";
 import { Question } from "~/types/index.d";
 
@@ -13,6 +14,7 @@ const addItem = (list: InputOutput[]) => {
   list.push({ parameters: [], expected_output: "" });
 };
 
+
 // Function to remove an item
 const removeItem = (list: InputOutput[], index: number) => {
   list.splice(index, 1);
@@ -23,7 +25,7 @@ const removeItem = (list: InputOutput[], index: number) => {
   <div>
     <div class="border border-blue-500 p-4 rounded-md mb-4">
       <!-- Examples -->
-      <QuestionsFormItemList
+      <QuestionsFormItemList  
         :label="'Examples'"
         :items="props.state.examples"
         :function_config="props.state.function_config"

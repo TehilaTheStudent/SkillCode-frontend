@@ -1,10 +1,4 @@
-<script setup lang="ts">
-import { sub } from "date-fns";
-
-
-
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <UDashboardPage>
@@ -12,11 +6,11 @@ import { sub } from "date-fns";
       <UDashboardNavbar title="Home">
         <template #right>
           <!-- <UTooltip text="Notifications" :shortcuts="['N']"> -->
-            <!-- <UButton color="gray" variant="ghost" square @click="isNotificationsSlideoverOpen = true"> -->
-              <!-- <UChip color="red" inset>
+          <!-- <UButton color="gray" variant="ghost" square @click="isNotificationsSlideoverOpen = true"> -->
+          <!-- <UChip color="red" inset>
                 <UIcon name="i-heroicons-bell" class="w-5 h-5" />
               </UChip> -->
-            <!-- </UButton> -->
+          <!-- </UButton> -->
           <!-- </UTooltip> -->
 
           <!-- <UDropdown :items="items">
@@ -38,6 +32,13 @@ import { sub } from "date-fns";
       <UDashboardPanelContent>
         <!-- ~/components/home/HomeChart.vue -->
         <!-- <HomeChart :period="period" :range="range" /> -->
+
+        <ULandingCard
+          title="SkillCode platform"
+          description="skillcode is a platform for learning and practicing programming languages."
+          icon="i-heroicons-academic-cap"
+          color="fuchsia"
+        />
 
         <div class="grid lg:grid-cols-2 lg:items-start gap-8 mt-8">
           <!-- ~/components/home/HomeSales.vue -->

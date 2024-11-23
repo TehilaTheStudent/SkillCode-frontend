@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 // Import necessary libraries
-import { ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
@@ -18,7 +17,7 @@ const emit = defineEmits(["update:modelValue", "update:language"]);
 
 // Ref to hold the currently selected language
 const currentLanguage = ref(
-  props.supportedLanguages[0] || PredefinedSupportedLanguage.Python // Default to Python
+   PredefinedSupportedLanguage.Python // Default to Python
 );
 
 // Ref for the editor container

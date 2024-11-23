@@ -1,4 +1,3 @@
-
 //#region SkillCode
 
 /**
@@ -20,7 +19,7 @@ export enum AtomicType {
  * @entity enum
  */
 export enum CompositeType {
-  GraphNode = "GraphNode",
+  Graph = "Graph",
   TreeNode = "TreeNode",
   ListNode = "ListNode",
   Array = "Array",
@@ -33,10 +32,10 @@ export enum CompositeType {
 export enum PredefinedSupportedLanguage {
   JavaScript = "JavaScript",
   Python = "Python",
-  Java = "Java",
-  Go = "Go",
-  CSharp = "CSharp",
-  Cpp = "Cpp",
+  // Java = "Java",
+  // Go = "Go",
+  // CSharp = "CSharp",
+  // Cpp = "Cpp",
 }
 
 /**
@@ -379,9 +378,6 @@ export class InputOutput {
   // }
 }
 
-
-
-
 export interface Feedback {
   status: "success" | "fail"; // Overall status: success or fail
   results: Result[]; // Array of individual test case results
@@ -395,8 +391,6 @@ export interface Result {
   expected_output: string; // Expected output of the test case
   actual_output: string; // Actual output of the test case
 }
-
-
 
 export enum Difficulty {
   Easy = "Easy",
@@ -552,9 +546,9 @@ export class Question {
  * @entity interface
  * @fields val, neighbors
  */
-export interface GraphNode {
+export interface Graph {
   val: number; // Value of the node
-  neighbors: GraphNode[]; // List of neighboring nodes (for graphs)
+  neighbors: Graph[]; // List of neighboring nodes (for graphs)
 }
 
 /**
@@ -577,9 +571,9 @@ export interface ListNode {
 }
 
 const reusableTypes = {
-  GraphNode: {
+  Graph: {
     val: "Integer",
-    neighbors: "Array<GraphNode>",
+    neighbors: "Array<Graph>",
   },
   TreeNode: {
     val: "Integer",

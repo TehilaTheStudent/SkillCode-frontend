@@ -19,7 +19,7 @@ const editedItem = ref<InputOutput>({});
 const showModal = ref(false);
 const saveEdit = () => {
   showModal.value = false;
-  editItemIndex.value = 0; //to avoid error?
+  // editItemIndex.value = 0; //to avoid error?
   emit("editItem", editItemIndex.value, editedItem.value);
 };
 </script>
@@ -32,8 +32,10 @@ const saveEdit = () => {
           <span>
             {{
               item.parameters.length > 0 || item.expected_output != ""
-                ? item.parameters.join(", ") + " => " + item.expected_output
-                : "not provided"
+                ? item.parameters.join(", ") +
+                  " => " +
+                  (item.expected_output !== "" ? item.expected_output : "")
+                : "edit please ----> "
             }}
           </span>
           <div>
@@ -68,17 +70,15 @@ const saveEdit = () => {
     </UButton>
   </UFormGroup>
 
-  <!-- Edit Modal -->
+  <!-- Edit Modal for single example/test case-->
   <UModal v-model="showModal" @close="saveEdit">
-    <template #header>Edit Item</template>
-    <QuestionsFormInputOutput
-      :item="editedItem"
-      :index="editItemIndex"
-      :function_config="props.function_config"
-    />
-
-    <template #footer>
-      <UButton size="sm" color="primary" @click="saveEdit">Save</UButton>
-    </template>
+    <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+      <template #header>Edit Item</template>
+      <QuestionsFormInputOutput
+        :item="editedItem"
+        :index="editItemIndex"
+        :function_config="props.function_config"
+      />
+    </UCard>
   </UModal>
 </template>

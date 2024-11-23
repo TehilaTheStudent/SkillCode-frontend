@@ -1,67 +1,97 @@
 <script lang="ts" setup>
-// This is a component that is used to display a single QuestionsFormInputOutput
+// This is a component that is used to display a single QuestionsFormInputOutput,
+//in the list if ItemList, to edit single testcase/example (parameters + return type)
 import type { Parameter, VoidType } from "~/types";
-import { FunctionConfig, InputOutput } from "~/types/index.d";
+import { FunctionConfig, InputOutput, AbstractType } from "~/types/index.d";
+import { onMounted } from "vue";
 
+const returnTypeExample = ref<string>("");
 const props = defineProps<{
   item: InputOutput;
   index: number;
   function_config: FunctionConfig; // The function configuration
 }>();
-// console.log(props.function_config);
+
 // Helper function to check if parameters are VoidType
 const isVoidType = (parameters: Parameter[] | "VoidType"): boolean => {
   return parameters === "VoidType";
 };
+const config = useRuntimeConfig();
+const parametersExamples = ref<string[]>(
+  props.function_config.parameters !== "VoidType"
+    ? Array(props.function_config.parameters.length).fill("")
+    : []
+);
+const apiUrl = `${config.public.backendUrl}/ds_utils/examples`;
+const fetchExample = async (type: AbstractType): Promise<string> => {
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(type),
+    });
+    const data = await response.json();
+    return data.example;
+  } catch (error) {
+    console.error("Error fetching example:", error);
+    return "Error fetching example";
+  }
+};
+
+const updateParameterValue = (index: number, value: string) => {
+  if (index === -1) {
+    props.item.expected_output = value;
+  } else {
+    props.item.parameters[index] = value;
+  }
+};
+
+if (!isVoidType(props.function_config.parameters)) {
+  for (const [index, param] of (props.function_config.parameters as Parameter[]).entries()) {
+    parametersExamples.value[index] = await fetchExample(param.param_type);
+  }
+}
+if (props.function_config.return_type !== "VoidType")
+  returnTypeExample.value = await fetchExample(props.function_config.return_type);
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-8 w-full border border-blue-500 p-4 rounded">
+ 
+  <div >
     <div class="text-gray-600 font-bold">#{{ props.index + 1 }}</div>
     <!-- Dynamic Inputs Based on FunctionConfig -->
+    <p>Parameters:</p>
     <div v-if="!isVoidType(props.function_config.parameters)">
       <div
         v-for="(param, paramIndex) in props.function_config.parameters"
         :key="'param-' + paramIndex"
         class="grid grid-cols-1 gap-4 mb-4"
       >
-        <!-- Parameter Name and Input -->
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-2 w-full">
-            <label class="font-medium">
-              <span
-                class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded border border-gray-200 font-mono"
-              >
-                {{ (param as Parameter).name }} =
-              </span>
-            </label>
-            <label class="font-medium">
-              <span
-                class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded border border-gray-200 overflow-hidden overflow-ellipsis whitespace-nowrap max-w-xs"
-              >
-                {{ (param as Parameter).param_type.toPrint() }}</span
-              >
-            </label>
-          </div>
-          <UInput
-            v-model="props.item.parameters[paramIndex]"
-            :placeholder="'Enter ' + (param as Parameter).name"
-            :name="'param-' + props.index + '-' + paramIndex"
-            class="w-full"
-          />
-        </div>
+        <QuestionsFormSingleParameter
+          :param="(param as Parameter)"
+          :paramIndex="paramIndex"
+          :example="parametersExamples[paramIndex]"
+          :parameterValue="props.item.parameters[paramIndex]"
+          :isReturnType="false"
+          @update:modelValue="updateParameterValue"
+        />
       </div>
     </div>
-
+    <div v-else>Void</div>
     <!-- Expected Output -->
-    <div>
-      <label class="font-medium">Expected Output:</label>
-      <UInput
-        v-model="props.item.expected_output"
-        :placeholder="'Enter Expected Output'"
-        :name="'output-' + props.index"
-        class="w-full"
+    <p class="font-medium">Expected Output:</p>
+    <div v-if="props.function_config.return_type !== 'VoidType'" class="flex items-center gap-2">
+      <QuestionsFormSingleParameter
+        :param="{ name: 'expected output', param_type: props.function_config.return_type }"
+        :paramIndex="props.index"
+        :example="returnTypeExample"
+        :parameterValue="props.item.expected_output"
+        :isReturnType="true"
+        @update:modelValue="updateParameterValue"
       />
     </div>
+    <div v-else>Void</div>
   </div>
 </template>

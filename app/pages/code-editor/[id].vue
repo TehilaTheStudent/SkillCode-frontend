@@ -52,6 +52,7 @@ const submitSolution = async () => {
   isSubmitting.value = true;
   submissionStatus.value = "idle";
   try {
+    console.log(language.value);
     const response = await fetch(`${apiUrl}/${questionId}/test`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -60,13 +61,17 @@ const submitSolution = async () => {
         language: language.value,
       }),
     });
-
+    if (!response.ok) {
+      console.error("Failed to submit solution:", response);
+      throw new Error("Failed to submit solution");
+    }
     isSubmitting.value = false;
     const result = await response.json();
     submissionStatus.value = "success";
     feedback.value = result; // Set feedback value
     isFeedbackModalOpen.value = true; // Open feedback modal
     toast.add({ title: "Question submitted successfully!", icon: "ep:success-filled", color: "green" });
+  // console.log("Solution submitted successfully:", result);
   } catch (error) {
     isSubmitting.value = false;
     submissionStatus.value = "error";

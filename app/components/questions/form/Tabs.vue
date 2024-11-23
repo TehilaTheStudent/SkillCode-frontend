@@ -44,9 +44,26 @@ const items = [
 
 //form
 const schema = yup.object({
-  // email: yup.string().email("Invalid email").required("Required"),
-  // password: yup.string().min(8, "Must be at least 8 characters").required("Required"),
+  title: yup.string().required("Title cannot be empty"),
+  description: yup.string().required("Description cannot be empty"),
+  languages: yup.array().min(1, "At least one language must be selected"),
+  function_config: yup
+    .object({
+      name: yup.string().required("Function name cannot be empty"),
+      parameters: yup.mixed().required("Parameters cannot be empty"),
+      return_type: yup.mixed().required("Return type cannot be empty"),
+    })
+    .test(
+      "return_type-and-parameters",
+      "Both return_type and parameters cannot be VoidType",
+      function (value) {
+        return !(value.return_type === "VoidType" && value.parameters === "VoidType");
+      }
+    ),
+  examples: yup.array().min(1, "Examples cannot be empty"),
+  test_cases: yup.array().min(1, "Test cases cannot be empty"),
 });
+
 function handleFunctionParameters(parameters: Parameter[] | VoidType): Parameter[] | VoidType {
   if (parameters === "VoidType") {
     return "VoidType";
@@ -142,6 +159,7 @@ async function updateQuestion(id: string, updatedQuestion: Question) {
 }
 
 async function addQuestion(newQuestion: Question) {
+  // console.log(newQuestion);
   const response = await fetch(`${apiUrl}`, {
     method: "POST",
     headers: {
@@ -149,20 +167,22 @@ async function addQuestion(newQuestion: Question) {
     },
     body: JSON.stringify(newQuestion),
   });
-
   if (!response.ok) {
-    throw new Error("Failed to add question");
+    
+    const errorData = await response.json();
+    // console.log(errorData);
+    throw new Error(errorData.error);
   }
 
   return await response.json();
 }
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // console.log("updatedQuestion");
 
   // Do something with event.data
-  // console.log(event.data);
   try {
+    console.log("trying to submit:",state);
+    await schema.validate(state, { abortEarly: false });
     if (props.isEdit) {
       await updateQuestion(props.selectedQuestion.id, state);
       toast.add({ title: "Question updated successfully!", icon: "ep:success-filled", color: "green" });
@@ -172,12 +192,23 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     }
     emit("close");
   } catch (error) {
-    console.error("Failed to submit the form:", error);
-    toast.add({
-      title: "Failed to submit the form.",
-      icon: "i-material-symbols:chat-error-rounded",
-      color: "red",
-    });
+    if (error instanceof yup.ValidationError) {
+      error.inner.forEach((err) => {
+        toast.add({
+          title: err.message,
+          icon: "i-material-symbols:chat-error-rounded",
+          color: "red",
+        });
+      });
+    } else {
+      // console.log(error);
+      toast.add({
+        title: "Server: Failed to submit the form.",
+        icon: "i-material-symbols:chat-error-rounded",
+        color: "red",
+        description:error.message
+      });
+    }
   }
 }
 
@@ -221,6 +252,9 @@ function updateState(newState: any) {
       <!-- <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit"> -->
       <UForm :state="state" class="space-y-4" @submit="onSubmit">
         <UButton type="submit"> Submit </UButton>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          ✨✨  You don't have to worry about language-specific naming conventions! We will take care of that! ✨✨
+        </p>
         <UTabs :items="items" class="w-full">
           <template #item="{ item }">
             <UCard>

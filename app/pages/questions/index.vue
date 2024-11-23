@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { row } from "@unovis/ts/components/timeline/style";
 import { InputOutput, Question, PredefinedCategory, Difficulty } from "~/types/index.d";
 const router = useRouter();
 const toast = useToast();

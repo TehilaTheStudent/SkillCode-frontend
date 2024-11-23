@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { ref } from "vue";
 import { AtomicType, CompositeType } from "~/types/index.d";
 
 const props = defineProps<{

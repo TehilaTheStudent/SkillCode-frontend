@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { number } from "yup";
+// import { number } from "yup";
 import { AbstractType, type VoidType, type Parameter, AtomicType } from "~/types/index.d";
 const props = defineProps<{ parameters: Parameter[] | VoidType }>();
 const emit = defineEmits(["updateParameters"]);
