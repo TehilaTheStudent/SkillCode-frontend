@@ -4,6 +4,7 @@ import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
+import { java } from "@codemirror/lang-java";
 import { StateEffect } from "@codemirror/state";
 import { PredefinedSupportedLanguage } from "~/types/index.d";
 
@@ -64,7 +65,11 @@ onMounted(async () => {
       doc: initialContent,
       extensions: [
         basicSetup, // Basic features (line numbers, bracket matching, etc.)
-        currentLanguage.value === PredefinedSupportedLanguage.JavaScript ? javascript() : python(),
+        currentLanguage.value === PredefinedSupportedLanguage.JavaScript
+          ? javascript()
+          : currentLanguage.value === PredefinedSupportedLanguage.Java
+          ? java()
+          : python(),
         EditorView.updateListener.of((viewUpdate) => {
           if (viewUpdate.docChanged) {
             // Emit the new value when the document changes
@@ -93,7 +98,11 @@ watch(currentLanguage, async (newLang) => {
       changes: { from: 0, to: editor.state.doc.length, insert: newContent },
       effects: StateEffect.reconfigure.of([
         basicSetup,
-        newLang === PredefinedSupportedLanguage.JavaScript ? javascript() : python(),
+        newLang === PredefinedSupportedLanguage.JavaScript
+          ? javascript()
+          : newLang === PredefinedSupportedLanguage.Java
+          ? java()
+          : python(),
         // Rebind the update listener to track changes
         EditorView.updateListener.of((viewUpdate) => {
           if (viewUpdate.docChanged) {

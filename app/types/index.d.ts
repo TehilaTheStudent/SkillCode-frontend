@@ -32,7 +32,7 @@ export enum CompositeType {
 export enum PredefinedSupportedLanguage {
   JavaScript = "JavaScript",
   Python = "Python",
-  // Java = "Java",
+  Java = "Java",
   // Go = "Go",
   // CSharp = "CSharp",
   // Cpp = "Cpp",

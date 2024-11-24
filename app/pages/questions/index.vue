@@ -33,8 +33,6 @@ const apiUrl = `${config.public.backendUrl}/questions`;
 const questions = ref<Question[]>([]);
 const pending = ref(false);
 
-
-
 // Trigger data fetching when the component is mounted
 onMounted(() => {
   refreshQuestions();
@@ -179,10 +177,10 @@ defineShortcuts({
 
       <UDashboardModal
         v-model="isDescriptionModalOpen"
-        title="Description & Examples"
+        title="Description & Examples & Test Cases"
         :ui="{ width: 'sm:max-w-2xl' }"
       >
-        <QuestionsDescriptionExamples :selectedQuestion="currentSelectedQuestion" />
+        <QuestionsDescriptionExamplesTestCases :selectedQuestion="currentSelectedQuestion" />
       </UDashboardModal>
       <UModal v-model="isOpenFormModal" fullscreen>
         <QuestionsFormTabs
@@ -212,7 +210,7 @@ defineShortcuts({
         <!-- Details column -->
         <template #details-data="{ row }">
           <div class="flex justify-center truncate w-10">
-            <UTooltip text="View Description & Examples">
+            <UTooltip text="View Description & Examples & Test Cases">
               <UButton icon="i-heroicons-eye" size="md" variant="ghost" @click="onViewDescription(row)" />
             </UTooltip>
           </div>

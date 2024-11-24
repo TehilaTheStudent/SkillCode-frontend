@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { prerender: true },
   },
-
+  
   devtools: {
     enabled: true,
   },

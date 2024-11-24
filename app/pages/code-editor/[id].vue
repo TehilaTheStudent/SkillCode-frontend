@@ -2,6 +2,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
+import { java } from "@codemirror/lang-java"; // Import Java language
 import { PredefinedSupportedLanguage, Question, type Feedback } from "~/types/index.d";
 
 const code = ref("// Write your solution here");
@@ -37,7 +38,11 @@ onMounted(async () => {
       if (editor) editor.destroy(); // Cleanup the previous editor
 
       const langExtension =
-        language.value === PredefinedSupportedLanguage.JavaScript ? javascript() : python();
+        language.value === PredefinedSupportedLanguage.JavaScript
+          ? javascript()
+          : language.value === PredefinedSupportedLanguage.Java
+          ? java() // Add Java language support
+          : python();
       editor = new EditorView({
         doc: code.value,
         extensions: [basicSetup, langExtension],
@@ -71,7 +76,7 @@ const submitSolution = async () => {
     feedback.value = result; // Set feedback value
     isFeedbackModalOpen.value = true; // Open feedback modal
     toast.add({ title: "Question submitted successfully!", icon: "ep:success-filled", color: "green" });
-  // console.log("Solution submitted successfully:", result);
+    // console.log("Solution submitted successfully:", result);
   } catch (error) {
     isSubmitting.value = false;
     submissionStatus.value = "error";
@@ -100,7 +105,7 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
       v-else
       @click="showDescriptionModal = true"
       variant="outline"
-      label="View Description & Examples"
+      label="View Description & Examples & Test Cases"
       icon="i-heroicons-eye"
       class="flex items-center space-x-2 text-blue-500"
     />
@@ -123,11 +128,13 @@ const updateLanguage = (newLanguage: PredefinedSupportedLanguage) => {
     </UModal>
     <!-- Modal -->
     <UDashboardModal
-      title="Description & Examples"
+      title="Description & Examples & Test Cases"
       :ui="{ width: 'sm:max-w-2xl' }"
       v-model="showDescriptionModal"
     >
-      <QuestionsDescriptionExamples :selectedQuestion="question"></QuestionsDescriptionExamples>
+      <QuestionsDescriptionExamplesTestCases
+        :selectedQuestion="question"
+      ></QuestionsDescriptionExamplesTestCases>
     </UDashboardModal>
 
     <USkeleton v-if="isLoading" class="h-[400px] w-full"> </USkeleton>
